@@ -3,5 +3,5 @@
 # Development environment setup
 
 - WordPress:
-  * MySQL database
-  * EasyPHP Devserver
+  * MySQL database - simply install
+  * EasyPHP Devserver - install and run Apache server previously unzipping Wordpress installation to eds-www folder
