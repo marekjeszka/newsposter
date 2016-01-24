@@ -24,6 +24,7 @@
 	</properties>
 
 	<dependencies>
+        <!-- Google mail dependencies -->
         <dependency>
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client</artifactId>
@@ -43,6 +44,13 @@
             <groupId>com.sun.mail</groupId>
             <artifactId>javax.mail</artifactId>
             <version>1.5.0</version>
+        </dependency>
+
+        <!-- WordPress dependencies -->
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>2.22.1</version>
         </dependency>
 
         <dependency>
