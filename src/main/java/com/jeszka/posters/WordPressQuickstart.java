@@ -1,5 +1,6 @@
 package com.jeszka.posters;
 
+import com.jeszka.domain.Post;
 import org.glassfish.jersey.client.ClientConfig;
 
 import javax.ws.rs.client.Client;
@@ -9,7 +10,6 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
-
 
 public class WordPressQuickstart {
     private static final String BODY =
@@ -41,5 +41,9 @@ public class WordPressQuickstart {
 
     private static URI getBaseURI() {
         return UriBuilder.fromUri("http://localhost:8080/wordpress/xmlrpc.php").build();
+    }
+
+    public void create(Post post) {
+
     }
 }
