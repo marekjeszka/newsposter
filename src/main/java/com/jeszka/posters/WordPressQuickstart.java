@@ -1,4 +1,4 @@
-package com.jeszka;
+package com.jeszka.posters;
 
 import org.glassfish.jersey.client.ClientConfig;
 
