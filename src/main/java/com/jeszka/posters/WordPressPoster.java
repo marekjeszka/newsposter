@@ -11,7 +11,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 
-public class WordPressQuickstart {
+public class WordPressPoster implements Poster {
     private static final String NEW_WORDPRESS_POST_FORMAT =
             "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n" +
                 "<methodCall>\n" +
@@ -35,7 +35,7 @@ public class WordPressQuickstart {
 
     private final WebTarget target;
 
-    public WordPressQuickstart() {
+    public WordPressPoster() {
         ClientConfig config = new ClientConfig();
         Client client = ClientBuilder.newClient(config);
 
@@ -44,6 +44,11 @@ public class WordPressQuickstart {
 
     private static URI getBaseURI() {
         return UriBuilder.fromUri("http://localhost:8080/wordpress/xmlrpc.php").build();
+    }
+
+    @Override
+    public boolean isAuthorized() {
+        return true;
     }
 
     /**
