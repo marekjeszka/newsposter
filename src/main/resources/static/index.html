@@ -7,9 +7,17 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="page-header" ng-controller="greetingCtrl">
-        <p>Welcome!</p>
-        <p>{{greetingResult}}</p>
+    <div class="container">
+        <div class="jumbotron" >
+            <h2>Welcome!</h2>
+        </div>
+        <div class="row" ng-controller="posterController">
+            <div class="col-md-6 col-md-offset-3">
+                <input id="postTopic" type="text" class="form-control" placeholder="Topic"/>
+                <textarea id="postBody" class="form-control" rows="8" placeholder="Content"></textarea>
+                <button class="btn btn-lg btn-primary" ng-click="sendPost()">Send post</button>
+            </div>
+        </div>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>

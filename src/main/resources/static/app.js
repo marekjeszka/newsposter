@@ -1,9 +1,11 @@
 var app = angular.module('myapp', []);
 
-app.controller('greetingCtrl', function($scope, $http){
-    $scope.greetingResult = "Hello World!";
-    waitingDialog.show('Greeting...');
-    setTimeout(function(){
-        waitingDialog.hide();
-    }, 5000);
+app.controller('posterController', function($scope, $http){
+    $scope.sendPost = function() {
+        var postObj = {
+            topic: document.getElementById("postTopic").value,
+            body: document.getElementById("postBody").value
+        }
+        $http.post('/wordpress', postObj);
+    }
 });
