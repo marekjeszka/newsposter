@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class NewsposterApplication {
+    public static String USER_TOKEN = "userToken";
 
     @Bean
     public WordPressPoster wordPressPoster() {
