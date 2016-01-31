@@ -21,8 +21,8 @@ public class LoginController {
     }
 
     @RequestMapping("/isAuthorized")
-    public @ResponseBody ResponseEntity<String> isAuthorizedRequest(@CookieValue(NewsposterApplication.USER_TOKEN) String fooCookie) {
-        return new ResponseEntity<>(isAuthorized(fooCookie) ? HttpStatus.OK : HttpStatus.UNAUTHORIZED);
+    public @ResponseBody ResponseEntity<String> isAuthorizedRequest(@CookieValue(NewsposterApplication.USER_TOKEN) String token) {
+        return new ResponseEntity<>(isAuthorized(token) ? HttpStatus.OK : HttpStatus.UNAUTHORIZED);
     }
 
     @RequestMapping("/login")
