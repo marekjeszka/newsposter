@@ -25,8 +25,9 @@ public class LoginController {
         return new ResponseEntity<>(isAuthorized(token) ? HttpStatus.OK : HttpStatus.UNAUTHORIZED);
     }
 
-    @RequestMapping("/login")
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
     public @ResponseBody ResponseEntity<String> login(@RequestParam char[] password, HttpServletResponse response) {
+        // TODO if cookie is already added redirect to main page
         final Cookie cookie = newCookie();
         // TODO if keystore opens, then it is authorized user
         authorizedTokens.add(cookie.getValue());
