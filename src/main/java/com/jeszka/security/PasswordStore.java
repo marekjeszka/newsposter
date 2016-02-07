@@ -81,27 +81,31 @@ public class PasswordStore {
     }
 
     /**
-     * Logs in with provided password and generates token,
+     * Logs in with provided password generating token,
      * that has to be used (as cookie value) in all future requests.
      * @param password application's master password
      * @return SHA1 token - generated from master password
      */
-    public String login(char[] password) throws GeneralSecurityException, IOException {
+    public String login(char[] password) {
 //        http://howtodoinjava.com/core-java/io/how-to-create-a-new-file-in-java/
         final Path passwordsPath = Paths.get(passwordsFilename);
-        if (Files.exists(passwordsPath)) {
-
-        } else {
+        if (!Files.exists(passwordsPath)) {
             // in newly created file store store some encrypted data,
             // to have something to decrypt during authorization check
             byte[] passwordBytes = new byte[password.length*2];
-            ByteBuffer.wrap(passwordBytes).asCharBuffer().put(password); // TODO this is not working quite well
-            // http://stackoverflow.com/questions/4931854/converting-char-array-into-byte-array-and-back-again
-            String defaultLine = String.format("%s%s%s",
-                    encrypt(DigestUtils.sha1Hex(passwordBytes), UUID.randomUUID().toString()),
-                    SPLIT_CHAR,
-                    encrypt(DigestUtils.sha1Hex(passwordBytes), UUID.randomUUID().toString()));
-            Files.write(passwordsPath, defaultLine.getBytes());
+            ByteBuffer.wrap(passwordBytes).asCharBuffer().put(password); // password stored as UTF-16
+            String sha1Token = DigestUtils.sha1Hex(passwordBytes);
+            try {
+                String defaultLine = String.format("%s%s%s",
+                        encrypt(sha1Token, UUID.randomUUID().toString()),
+                        SPLIT_CHAR,
+                        encrypt(sha1Token, UUID.randomUUID().toString()));
+                Files.write(passwordsPath, defaultLine.getBytes());
+            } catch (GeneralSecurityException | IOException e) {
+                System.out.println("Error during creation of credentials file: " + e.getMessage());
+                return null;
+            }
+            return sha1Token;
         }
         return null;
     }

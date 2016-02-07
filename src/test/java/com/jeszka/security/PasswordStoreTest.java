@@ -48,9 +48,4 @@ public class PasswordStoreTest {
     public void isAuthorizedFailTest() {
         assertFalse(new PasswordStore().isAuthorized(""));
     }
-
-    @Test
-    public void loginTest() throws GeneralSecurityException, IOException {
-        new PasswordStore().login(new char[]{'a', 'b'});
-    }
 }
