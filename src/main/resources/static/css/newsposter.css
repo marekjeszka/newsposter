@@ -2,3 +2,13 @@
     font-size: 25px;
     vertical-align:middle;
 }
+
+.form-signin {
+    max-width: 420px;
+    padding: 15px;
+    margin: 0px auto;
+}
+
+.form-signin .form-signin-heading {
+    margin-bottom: 10px;
+}

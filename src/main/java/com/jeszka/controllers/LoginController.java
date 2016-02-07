@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -27,11 +28,13 @@ public class LoginController {
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public @ResponseBody ResponseEntity<String> login(@RequestParam char[] password, HttpServletResponse response) {
-        // TODO if cookie is already added redirect to main page
+    public @ResponseBody ResponseEntity<String> login(@RequestBody Map<String, char[]> body, HttpServletResponse response) {
+        // TODO first check if is already authorized
         final Cookie cookie = newCookie();
-        // TODO if keystore opens, then it is authorized user
-//        String cookieValue = passwordStore.login(password);
+        // TODO validate body
+        char[] password = body.get("password");
+        String cookieValue = passwordStore.login(password);
+        cookie.setValue(cookieValue);
         response.addCookie(cookie);
         return new ResponseEntity<>(HttpStatus.OK);
     }
