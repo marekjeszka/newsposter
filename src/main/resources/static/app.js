@@ -3,7 +3,8 @@ var app = angular.module('myapp', []);
 app.controller('posterController', function($scope, $http, $window){
     $scope.init = function() {
         $http.get('/isAuthorized')
-            .then(function errorCallback(response) { $window.location.href = "/masterPassword.html"; });
+            .then(function successCallback(response) { },
+                  function errorCallback(response) { $window.location.href = "/masterPassword.html"; });
     }
 
     $scope.sendPost = function() {

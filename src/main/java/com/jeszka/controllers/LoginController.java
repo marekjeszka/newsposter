@@ -1,23 +1,24 @@
 package com.jeszka.controllers;
 
 import com.jeszka.NewsposterApplication;
+import com.jeszka.security.PasswordStore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @RestController
 public class LoginController {
 
-    private Set<String> authorizedTokens = new HashSet<>();
+    @Autowired
+    PasswordStore passwordStore;
 
     public boolean isAuthorized(String token) {
-        return authorizedTokens.contains(token);
+        return passwordStore.isAuthorized(token);
     }
 
     @RequestMapping("/isAuthorized")
@@ -30,7 +31,7 @@ public class LoginController {
         // TODO if cookie is already added redirect to main page
         final Cookie cookie = newCookie();
         // TODO if keystore opens, then it is authorized user
-        authorizedTokens.add(cookie.getValue());
+//        String cookieValue = passwordStore.login(password);
         response.addCookie(cookie);
         return new ResponseEntity<>(HttpStatus.OK);
     }
