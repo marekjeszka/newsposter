@@ -90,11 +90,9 @@ public class PasswordStore {
 //        http://howtodoinjava.com/core-java/io/how-to-create-a-new-file-in-java/
         final Path passwordsPath = Paths.get(passwordsFilename);
         if (!Files.exists(passwordsPath)) {
-            // in newly created file store store some encrypted data,
+            String sha1Token = getPasswordToken(password);
+            // in newly created file store some encrypted data,
             // to have something to decrypt during authorization check
-            byte[] passwordBytes = new byte[password.length*2];
-            ByteBuffer.wrap(passwordBytes).asCharBuffer().put(password); // password stored as UTF-16
-            String sha1Token = DigestUtils.sha1Hex(passwordBytes);
             try {
                 String defaultLine = String.format("%s%s%s",
                         encrypt(sha1Token, UUID.randomUUID().toString()),
@@ -106,8 +104,17 @@ public class PasswordStore {
                 return null;
             }
             return sha1Token;
+        } else {
+            System.out.println("Checking provided password...");
+            final String passwordToken = getPasswordToken(password);
+            return isAuthorized(passwordToken) ? passwordToken : null;
         }
-        return null;
+    }
+
+    private String getPasswordToken(char[] password) {
+        byte[] passwordBytes = new byte[password.length*2];
+        ByteBuffer.wrap(passwordBytes).asCharBuffer().put(password); // password stored as UTF-16
+        return DigestUtils.sha1Hex(passwordBytes);
     }
 
     String getPassword(String userPassword) {

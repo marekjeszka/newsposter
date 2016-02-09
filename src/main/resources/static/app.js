@@ -29,9 +29,9 @@ app.controller('loginController', function($scope, $http, $window) {
         var postObj = {
             password: document.getElementById("password").value,
         }
-        $http.post('/login', postObj);
-
-        // TODO redirect to main page if successful
+        $http.post('/login', postObj)
+            .then(function successCallback(response) { $window.location.href = "/index.html"; },
+                  function errorCallback(response) { });
     }
 
     $scope.passwordChanged = function() {

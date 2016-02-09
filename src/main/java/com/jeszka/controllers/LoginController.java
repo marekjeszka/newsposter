@@ -5,6 +5,7 @@ import com.jeszka.security.PasswordStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
@@ -28,15 +29,26 @@ public class LoginController {
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public @ResponseBody ResponseEntity<String> login(@RequestBody Map<String, char[]> body, HttpServletResponse response) {
-        // TODO first check if is already authorized
+    public @ResponseBody ResponseEntity<String> login(
+            @RequestBody Map<String, char[]> body,
+            @CookieValue(value = NewsposterApplication.USER_TOKEN, required = false) String token,
+            HttpServletResponse response) {
+        // check if is already authorized
+        if (token != null && isAuthorized(token)) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+
         final Cookie cookie = newCookie();
         // TODO validate body
         char[] password = body.get("password");
         String cookieValue = passwordStore.login(password);
-        cookie.setValue(cookieValue);
-        response.addCookie(cookie);
-        return new ResponseEntity<>(HttpStatus.OK);
+        if (!StringUtils.isEmpty(cookieValue)) {
+            cookie.setValue(cookieValue);
+            response.addCookie(cookie);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
     }
 
     private Cookie newCookie() {
