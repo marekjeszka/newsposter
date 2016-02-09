@@ -25,8 +25,6 @@ app.controller('loginController', function($scope, $http, $window) {
                   function errorCallback(response) { } );
     }
 
-    // TODO check password length (enable/disable button)
-
     $scope.login = function() {
         var postObj = {
             password: document.getElementById("password").value,
@@ -34,6 +32,14 @@ app.controller('loginController', function($scope, $http, $window) {
         $http.post('/login', postObj);
 
         // TODO redirect to main page if successful
+    }
+
+    $scope.passwordChanged = function() {
+        var passwordLength = document.getElementById("password").value.length;
+        if (passwordLength < 8)
+            document.getElementById("buttonLogIn").disabled = true;
+        else
+            document.getElementById("buttonLogIn").disabled = false;
     }
 
     $scope.init();
