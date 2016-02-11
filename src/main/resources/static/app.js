@@ -44,3 +44,14 @@ app.controller('loginController', function($scope, $http, $window) {
 
     $scope.init();
 });
+
+app.controller('credentialsController', function($scope, $http, $window) {
+    $scope.storeCredentials = function() {
+        var credentialsObj = {
+            appName: document.getElementById("appName").value,
+            username: document.getElementById("username").value,
+            password: document.getElementById("password").value
+        }
+        $http.post('/credentials', credentialsObj);
+    }
+});

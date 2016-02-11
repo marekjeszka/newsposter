@@ -15,13 +15,14 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 public class PasswordStore {
-    private static final String passwordsFilename = "credentials";
-    private static final String algorithm = "PBEWithMD5AndDES";
+    private static final String PASSWORDS_FILENAME = "credentials";
+    private static final String ALGORITHM = "PBEWithMD5AndDES";
     private static final byte[] SALT = {
             (byte) 0xde, (byte) 0x33, (byte) 0x10, (byte) 0x12,
             (byte) 0xde, (byte) 0x33, (byte) 0x10, (byte) 0x12,
@@ -30,9 +31,11 @@ public class PasswordStore {
 
     private SecretKeyFactory keyFactory;
 
-    String encrypt(String masterPassword, String property) throws GeneralSecurityException, UnsupportedEncodingException {
+    // TODO not work with Strings
+
+    public String encrypt(String masterPassword, String property) throws GeneralSecurityException, UnsupportedEncodingException {
         SecretKey key = getKeyFactory().generateSecret(new PBEKeySpec(masterPassword.toCharArray()));
-        Cipher pbeCipher = Cipher.getInstance(algorithm);
+        Cipher pbeCipher = Cipher.getInstance(ALGORITHM);
         pbeCipher.init(Cipher.ENCRYPT_MODE, key, new PBEParameterSpec(SALT, 20));
         return base64Encode(pbeCipher.doFinal(property.getBytes("UTF-8")));
     }
@@ -41,9 +44,9 @@ public class PasswordStore {
         return new BASE64Encoder().encode(bytes);
     }
 
-    String decrypt(String masterPassword, String property) throws GeneralSecurityException, IOException {
+    public String decrypt(String masterPassword, String property) throws GeneralSecurityException, IOException {
         SecretKey key = getKeyFactory().generateSecret(new PBEKeySpec(masterPassword.toCharArray()));
-        Cipher pbeCipher = Cipher.getInstance(algorithm);
+        Cipher pbeCipher = Cipher.getInstance(ALGORITHM);
         pbeCipher.init(Cipher.DECRYPT_MODE, key, new PBEParameterSpec(SALT, 20));
         return new String(pbeCipher.doFinal(base64Decode(property)), "UTF-8");
     }
@@ -54,13 +57,13 @@ public class PasswordStore {
 
     private SecretKeyFactory getKeyFactory() throws NoSuchAlgorithmException {
         if (keyFactory == null) {
-            keyFactory = SecretKeyFactory.getInstance(algorithm);
+            keyFactory = SecretKeyFactory.getInstance(ALGORITHM);
         }
         return keyFactory;
     }
 
     public boolean isAuthorized(String token) {
-        final Path passwordsPath = Paths.get(passwordsFilename);
+        final Path passwordsPath = Paths.get(PASSWORDS_FILENAME);
         if (Files.exists(passwordsPath)) {
             try {
                 final String defaultLine =
@@ -88,7 +91,7 @@ public class PasswordStore {
      */
     public String login(char[] password) {
 //        http://howtodoinjava.com/core-java/io/how-to-create-a-new-file-in-java/
-        final Path passwordsPath = Paths.get(passwordsFilename);
+        final Path passwordsPath = Paths.get(PASSWORDS_FILENAME);
         if (!Files.exists(passwordsPath)) {
             String sha1Token = getPasswordToken(password);
             // in newly created file store some encrypted data,
@@ -96,7 +99,8 @@ public class PasswordStore {
             try {
                 String defaultLine = "defaultLine" + SPLIT_CHAR +
                         encrypt(sha1Token, UUID.randomUUID().toString()) + SPLIT_CHAR +
-                        encrypt(sha1Token, UUID.randomUUID().toString());
+                        encrypt(sha1Token, UUID.randomUUID().toString()) +
+                        System.lineSeparator();
                 Files.write(passwordsPath, defaultLine.getBytes());
             } catch (GeneralSecurityException | IOException e) {
                 System.out.println("Error during creation of credentials file: " + e.getMessage());
@@ -124,5 +128,23 @@ public class PasswordStore {
                     "";
         }
         else return "";
+    }
+
+    /**
+     * @return true, if succeeded
+     */
+    public boolean storeCredentials(String appName, String hashedUser, String hashedPassword) {
+        final Path passwordsPath = Paths.get(PASSWORDS_FILENAME);
+        if (Files.exists(passwordsPath)) {
+            try {
+                Files.write(passwordsPath,
+                        (appName + SPLIT_CHAR + hashedUser + SPLIT_CHAR + hashedPassword + System.lineSeparator()).getBytes(),
+                        StandardOpenOption.APPEND);
+                return true;
+            } catch (IOException e) {
+                System.out.println("Error writing credentials: " + e);
+            }
+        }
+        return false;
     }
 }

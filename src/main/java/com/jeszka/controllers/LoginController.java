@@ -1,6 +1,7 @@
 package com.jeszka.controllers;
 
 import com.jeszka.NewsposterApplication;
+import com.jeszka.domain.AppCredentials;
 import com.jeszka.security.PasswordStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -57,5 +60,20 @@ public class LoginController {
         final int SEC_IN_WEEK = 60 * 60 * 24 * 7;
         cookie.setMaxAge(SEC_IN_WEEK);
         return cookie;
+    }
+
+    @RequestMapping(value = "/credentials", method = RequestMethod.POST)
+    public void storeCredentials(@RequestBody AppCredentials appCredentials,
+                                 @CookieValue(NewsposterApplication.USER_TOKEN) String token) {
+        if (token != null && isAuthorized(token)) {
+            try {
+                passwordStore.storeCredentials(
+                        appCredentials.getAppName(),
+                        passwordStore.encrypt(token, appCredentials.getUsername()),
+                        passwordStore.encrypt(token, appCredentials.getPassword()));
+            } catch (GeneralSecurityException | UnsupportedEncodingException e) {
+                System.out.println("Error storing credentials " + e);
+            }
+        }
     }
 }

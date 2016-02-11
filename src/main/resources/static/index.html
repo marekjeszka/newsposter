@@ -22,14 +22,17 @@
         </div>
     </div>
 
-    <div id="settingsModal" class="modal fade" role="dialog">
+    <div id="settingsModal" class="modal fade" role="dialog" ng-controller="credentialsController">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Settings</h4>
+                    <h4 class="modal-title">Connected targets</h4>
                 </div>
                 <div class="modal-body">
-                    <p>...</p>
+                    <input class="form-control" id="appName" placeholder="application name"/>
+                    <input class="form-control" id="username" placeholder="username"/>
+                    <input class="form-control" id="password" type="password" placeholder="password"/>
+                    <button class="btn btn-lg btn-primary btn-block" ng-click="storeCredentials()">Add</button>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
