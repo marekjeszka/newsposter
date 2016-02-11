@@ -94,10 +94,9 @@ public class PasswordStore {
             // in newly created file store some encrypted data,
             // to have something to decrypt during authorization check
             try {
-                String defaultLine = String.format("%s%s%s",
-                        encrypt(sha1Token, UUID.randomUUID().toString()),
-                        SPLIT_CHAR,
-                        encrypt(sha1Token, UUID.randomUUID().toString()));
+                String defaultLine = "defaultLine" + SPLIT_CHAR +
+                        encrypt(sha1Token, UUID.randomUUID().toString()) + SPLIT_CHAR +
+                        encrypt(sha1Token, UUID.randomUUID().toString());
                 Files.write(passwordsPath, defaultLine.getBytes());
             } catch (GeneralSecurityException | IOException e) {
                 System.out.println("Error during creation of credentials file: " + e.getMessage());
@@ -117,9 +116,13 @@ public class PasswordStore {
         return DigestUtils.sha1Hex(passwordBytes);
     }
 
-    String getPassword(String userPassword) {
-        if (userPassword.length() > 2 && userPassword.indexOf(SPLIT_CHAR) > -1)
-            return userPassword.substring(userPassword.indexOf(SPLIT_CHAR) + 1);
+    String getPassword(String appUserPassword) {
+        if (appUserPassword.length() > 2 && appUserPassword.indexOf(SPLIT_CHAR) > -1) {
+            final String[] split = appUserPassword.split(Character.toString(SPLIT_CHAR));
+            return split.length == 3 ?
+                    split[2] :
+                    "";
+        }
         else return "";
     }
 }

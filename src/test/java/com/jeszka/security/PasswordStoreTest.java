@@ -6,7 +6,8 @@ import javax.crypto.BadPaddingException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 public class PasswordStoreTest {
     // https://commons.apache.org/proper/commons-codec/apidocs/src-html/org/apache/commons/codec/digest/DigestUtils.html#line.437
@@ -36,16 +37,11 @@ public class PasswordStoreTest {
 
     @Test
     public void getPasswordTest() {
-        assertEquals("pass", new PasswordStore().getPassword("me:pass"));
+        assertEquals("pass", new PasswordStore().getPassword("app:me:pass"));
     }
 
     @Test
     public void getPasswordWrongStringTest() {
-        assertNotEquals("pass", new PasswordStore().getPassword("me,pass"));
-    }
-
-    @Test
-    public void isAuthorizedFailTest() {
-        assertFalse(new PasswordStore().isAuthorized(""));
+        assertNotEquals("pass", new PasswordStore().getPassword("me:pass"));
     }
 }
