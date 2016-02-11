@@ -12,7 +12,7 @@ app.controller('posterController', function($scope, $http, $window){
             topic: document.getElementById("postTopic").value,
             body: document.getElementById("postBody").value
         }
-        $http.post('/wordpress', postObj);
+        $http.post('/post', postObj);
     }
 
     $scope.init();

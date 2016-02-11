@@ -5,6 +5,12 @@ public class AppCredentials {
     String username;
     String password;
 
+    public AppCredentials(String appName, String username, String password) {
+        this.appName = appName;
+        this.username = username;
+        this.password = password;
+    }
+
     public String getAppName() {
         return appName;
     }

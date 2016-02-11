@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.*;
 public class NewPostsController {
 
     @Autowired
-    WordPressPoster wordPressPoster;
+    private WordPressPoster wordPressPoster;
 
-    @RequestMapping(value = "/wordpress", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/post", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     public void newPost(@RequestBody Post post, @CookieValue(NewsposterApplication.USER_TOKEN) String token) {
         System.out.println("wordpress posting..." + post);
-        wordPressPoster.create(post);
+        wordPressPoster.create(post, token);
     }
 }

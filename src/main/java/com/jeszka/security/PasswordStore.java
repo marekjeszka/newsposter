@@ -1,5 +1,6 @@
 package com.jeszka.security;
 
+import com.jeszka.domain.AppCredentials;
 import org.apache.commons.codec.digest.DigestUtils;
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
@@ -18,6 +19,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Optional;
 import java.util.UUID;
 
 public class PasswordStore {
@@ -77,7 +79,6 @@ public class PasswordStore {
                 // IOException will not occur - file existence checked
                 // wrong token will generate BadPaddingException
                 System.out.println("Not authorized: " + e.getMessage());
-                return false;
             }
         }
         return false;
@@ -90,7 +91,6 @@ public class PasswordStore {
      * @return SHA1 token - generated from master password
      */
     public String login(char[] password) {
-//        http://howtodoinjava.com/core-java/io/how-to-create-a-new-file-in-java/
         final Path passwordsPath = Paths.get(PASSWORDS_FILENAME);
         if (!Files.exists(passwordsPath)) {
             String sha1Token = getPasswordToken(password);
@@ -145,6 +145,41 @@ public class PasswordStore {
                 System.out.println("Error writing credentials: " + e);
             }
         }
+        return false;
+    }
+
+    public AppCredentials getCredentials(String appName, String masterPassword) {
+        final Path passwordsPath = Paths.get(PASSWORDS_FILENAME);
+        if (Files.exists(passwordsPath)) {
+            try {
+                final Optional<String> foundCredentials =
+                        Files.lines(passwordsPath)
+                             .filter(s -> s.startsWith(appName))
+                             .findFirst();
+                if (foundCredentials.isPresent()) {
+                    return mapLineToCredentials(foundCredentials.get(), masterPassword);
+                }
+            } catch (IOException | GeneralSecurityException e) {
+                // IOException will not occur - file existence checked
+                // wrong token will generate BadPaddingException
+                System.out.println("Not authorized: " + e.getMessage());
+            }
+        }
+        return null;
+    }
+
+    private AppCredentials mapLineToCredentials(String foundCredentials, String masterPassword) throws GeneralSecurityException, IOException {
+        if (foundCredentials.length() > 2 && foundCredentials.indexOf(SPLIT_CHAR) > -1) {
+            final String[] split = foundCredentials.split(Character.toString(SPLIT_CHAR));
+            return split.length == 3 ?
+                    new AppCredentials(split[0], decrypt(masterPassword, split[1]), decrypt(masterPassword, split[2])) :
+                    null;
+        }
+        return null;
+    }
+
+    private boolean isCorrectLine() {
+        // TODO implement regex
         return false;
     }
 }

@@ -15,7 +15,7 @@ public class GmailPoster implements Poster {
     }
 
     @Override
-    public void create(Post post) {
+    public void create(Post post, String masterPassword) {
         // TODO invoke GmailQuickstart stuff
     }
 }

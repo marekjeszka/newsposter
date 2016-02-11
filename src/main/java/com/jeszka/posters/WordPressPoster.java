@@ -1,7 +1,10 @@
 package com.jeszka.posters;
 
+import com.jeszka.domain.AppCredentials;
 import com.jeszka.domain.Post;
+import com.jeszka.security.PasswordStore;
 import org.glassfish.jersey.client.ClientConfig;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -12,14 +15,17 @@ import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 
 public class WordPressPoster implements Poster {
+    @Autowired
+    private PasswordStore passwordStore;
+
     private static final String NEW_WORDPRESS_POST_FORMAT =
             "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n" +
                 "<methodCall>\n" +
                 "  <methodName>wp.newPost</methodName>\n" +
                 "  <params>\n" +
                 "   <param><value>1</value></param>\n" +
-                "   <param><value>" + System.getenv("NEWSPOSTER_WORDPRESS_USERNAME") + "</value></param>\n" +
-                "   <param><value>" + System.getenv("NEWSPOSTER_WORDPRESS_PASSWORD") + "</value></param>\n" +
+                "   <param><value>" + "%s" + "</value></param>\n" +
+                "   <param><value>" + "%s" + "</value></param>\n" +
                 "   <struct>\n" +
                 "      <member>\n" +
                 "        <name>post_title</name>\n" +
@@ -54,9 +60,10 @@ public class WordPressPoster implements Poster {
     /**
      * Invokes POST method to create a new post.
      * @param post post to be created
+     * @param masterPassword password to encode credentials stored in file
      */
-    public void create(Post post) {
-        String postAsString = newWordpressPost(post.getTopic(), post.getBody());
+    public void create(Post post, String masterPassword) {
+        String postAsString = newWordpressPost(post.getTopic(), post.getBody(), masterPassword);
 
         String response = target
                 .request()
@@ -66,7 +73,11 @@ public class WordPressPoster implements Poster {
         System.out.println(response);
     }
 
-    private String newWordpressPost(String topic, String body) {
-        return String.format(NEW_WORDPRESS_POST_FORMAT, topic, body);
+    private String newWordpressPost(String topic, String body, String masterPassword) {
+        // TODO handle app name
+        final AppCredentials myApp = passwordStore.getCredentials("myApp", masterPassword);
+        return String.format(NEW_WORDPRESS_POST_FORMAT,
+                myApp.getUsername(), myApp.getPassword(),
+                topic, body);
     }
 }
