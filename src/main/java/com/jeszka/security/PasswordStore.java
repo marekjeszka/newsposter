@@ -35,6 +35,10 @@ public class PasswordStore {
 
     // TODO not work with Strings
 
+    Path getPasswordPath() {
+        return Paths.get(PASSWORDS_FILENAME);
+    }
+
     public String encrypt(String masterPassword, String property) throws GeneralSecurityException, UnsupportedEncodingException {
         SecretKey key = getKeyFactory().generateSecret(new PBEKeySpec(masterPassword.toCharArray()));
         Cipher pbeCipher = Cipher.getInstance(ALGORITHM);
@@ -65,11 +69,11 @@ public class PasswordStore {
     }
 
     public boolean isAuthorized(String token) {
-        final Path passwordsPath = Paths.get(PASSWORDS_FILENAME);
-        if (Files.exists(passwordsPath)) {
+        final Path passwordPath = getPasswordPath();
+        if (Files.exists(passwordPath)) {
             try {
                 final String defaultLine =
-                        Files.lines(passwordsPath)
+                        Files.lines(passwordPath)
                              .findFirst()
                              .get();
                 String password = getPassword(defaultLine);
@@ -91,8 +95,8 @@ public class PasswordStore {
      * @return SHA1 token - generated from master password
      */
     public String login(char[] password) {
-        final Path passwordsPath = Paths.get(PASSWORDS_FILENAME);
-        if (!Files.exists(passwordsPath)) {
+        final Path passwordPath = getPasswordPath();
+        if (!Files.exists(passwordPath)) {
             String sha1Token = getPasswordToken(password);
             // in newly created file store some encrypted data,
             // to have something to decrypt during authorization check
@@ -101,7 +105,7 @@ public class PasswordStore {
                         encrypt(sha1Token, UUID.randomUUID().toString()) + SPLIT_CHAR +
                         encrypt(sha1Token, UUID.randomUUID().toString()) +
                         System.lineSeparator();
-                Files.write(passwordsPath, defaultLine.getBytes());
+                Files.write(passwordPath, defaultLine.getBytes());
             } catch (GeneralSecurityException | IOException e) {
                 System.out.println("Error during creation of credentials file: " + e.getMessage());
                 return null;
@@ -134,10 +138,10 @@ public class PasswordStore {
      * @return true, if succeeded
      */
     public boolean storeCredentials(String appName, String hashedUser, String hashedPassword) {
-        final Path passwordsPath = Paths.get(PASSWORDS_FILENAME);
-        if (Files.exists(passwordsPath)) {
+        final Path passwordPath = getPasswordPath();
+        if (Files.exists(passwordPath)) {
             try {
-                Files.write(passwordsPath,
+                Files.write(passwordPath,
                         (appName + SPLIT_CHAR + hashedUser + SPLIT_CHAR + hashedPassword + System.lineSeparator()).getBytes(),
                         StandardOpenOption.APPEND);
                 return true;
@@ -149,11 +153,11 @@ public class PasswordStore {
     }
 
     public AppCredentials getCredentials(String appName, String masterPassword) {
-        final Path passwordsPath = Paths.get(PASSWORDS_FILENAME);
-        if (Files.exists(passwordsPath)) {
+        final Path passwordPath = getPasswordPath();
+        if (Files.exists(passwordPath)) {
             try {
                 final Optional<String> foundCredentials =
-                        Files.lines(passwordsPath)
+                        Files.lines(passwordPath)
                              .filter(s -> s.startsWith(appName))
                              .findFirst();
                 if (foundCredentials.isPresent()) {

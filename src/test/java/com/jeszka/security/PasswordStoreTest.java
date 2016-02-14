@@ -1,18 +1,24 @@
 package com.jeszka.security;
 
+import com.jeszka.domain.AppCredentials;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import javax.crypto.BadPaddingException;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
 
 public class PasswordStoreTest {
-    // https://commons.apache.org/proper/commons-codec/apidocs/src-html/org/apache/commons/codec/digest/DigestUtils.html#line.437
-    String masterPassword = "512d60630ec3df27158620b1359173b884b0a551";
-    String newPassword = "ddd123ddd";
+    private final static String CREDENTIALS_TEST_PASS = "TDD";
+    private final static String CREDENTIALS_TEST_TOKEN = "fc51c109863cbba59bc32b949f736db737f4b30d";
+    private final static String CREDENTIALS_TEST_PATH = "src/test/resources/credentials_test";
+
+    private String masterPassword = "512d60630ec3df27158620b1359173b884b0a551";
+    private String newPassword = "ddd123ddd";
 
     @Test
     public void encryptDecryptTest() throws GeneralSecurityException, IOException {
@@ -43,5 +49,33 @@ public class PasswordStoreTest {
     @Test
     public void getPasswordWrongStringTest() {
         assertNotEquals("pass", new PasswordStore().getPassword("me:pass"));
+    }
+
+    private PasswordStore getPasswordStoreSpied() {
+        final PasswordStore passwordStore = Mockito.spy(new PasswordStore());
+        when(passwordStore.getPasswordPath()).thenReturn(Paths.get(CREDENTIALS_TEST_PATH));
+        return passwordStore;
+    }
+
+    @Test
+    public void isAuthorizedTest() {
+        final PasswordStore passwordStore = getPasswordStoreSpied();
+
+        assertEquals(CREDENTIALS_TEST_TOKEN, passwordStore.login(CREDENTIALS_TEST_PASS.toCharArray()));
+        assertNull(passwordStore.login("forgotten".toCharArray()));
+    }
+
+    @Test
+    public void storeCredentialsTest() {
+        
+    }
+
+    @Test
+    public void getCredentialsTest() {
+        final AppCredentials defaultLine =
+                getPasswordStoreSpied().getCredentials("defaultLine", CREDENTIALS_TEST_TOKEN);
+        assertEquals("defaultLine", defaultLine.getAppName());
+        assertNotNull(defaultLine.getUsername());
+        assertNotNull(defaultLine.getPassword());
     }
 }
