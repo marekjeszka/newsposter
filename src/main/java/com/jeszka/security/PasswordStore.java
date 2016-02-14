@@ -19,8 +19,10 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class PasswordStore {
     private static final String PASSWORDS_FILENAME = "credentials";
@@ -30,6 +32,7 @@ public class PasswordStore {
             (byte) 0xde, (byte) 0x33, (byte) 0x10, (byte) 0x12,
     };
     private static final char SPLIT_CHAR = ':';
+    private static final String DEFAULT_LINE = "defaultLine";
 
     private SecretKeyFactory keyFactory;
 
@@ -101,7 +104,7 @@ public class PasswordStore {
             // in newly created file store some encrypted data,
             // to have something to decrypt during authorization check
             try {
-                String defaultLine = "defaultLine" + SPLIT_CHAR +
+                String defaultLine = DEFAULT_LINE + SPLIT_CHAR +
                         encrypt(sha1Token, UUID.randomUUID().toString()) + SPLIT_CHAR +
                         encrypt(sha1Token, UUID.randomUUID().toString()) +
                         System.lineSeparator();
@@ -185,5 +188,21 @@ public class PasswordStore {
     private boolean isCorrectLine() {
         // TODO implement regex
         return false;
+    }
+
+    public List<String> getStoredApps() {
+        // TODO retrieve only active apps
+        final Path passwordPath = getPasswordPath();
+        if (Files.exists(passwordPath)) {
+            try {
+                return Files.lines(passwordPath)
+                            .filter(s -> !s.startsWith(DEFAULT_LINE))
+                            .map(s -> s.split(Character.toString(SPLIT_CHAR))[0]) // TODO NPE
+                            .collect(Collectors.toList());
+            } catch (IOException e) {
+                System.out.println("Error reading stored apps: " + e.getMessage());
+            }
+        }
+        return null;
     }
 }

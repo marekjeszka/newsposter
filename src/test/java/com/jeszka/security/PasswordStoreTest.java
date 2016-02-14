@@ -95,4 +95,11 @@ public class PasswordStoreTest {
         assertNotNull(defaultLine.getUsername());
         assertNotNull(defaultLine.getPassword());
     }
+
+    @Test
+    public void getStoredAppsTest() {
+        final PasswordStore passwordStore = getPasswordStoreSpied();
+
+        assertEquals(1, passwordStore.getStoredApps().size());
+    }
 }

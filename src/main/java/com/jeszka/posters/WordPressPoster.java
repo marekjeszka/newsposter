@@ -62,8 +62,8 @@ public class WordPressPoster implements Poster {
      * @param post post to be created
      * @param masterPassword password to encode credentials stored in file
      */
-    public void create(Post post, String masterPassword) {
-        String postAsString = newWordpressPost(post.getTopic(), post.getBody(), masterPassword);
+    public void create(Post post, String appName, String masterPassword) {
+        String postAsString = newWordpressPost(post.getTopic(), post.getBody(), appName, masterPassword);
 
         String response = target
                 .request()
@@ -73,9 +73,8 @@ public class WordPressPoster implements Poster {
         System.out.println(response);
     }
 
-    private String newWordpressPost(String topic, String body, String masterPassword) {
-        // TODO handle app name
-        final AppCredentials myApp = passwordStore.getCredentials("myApp", masterPassword);
+    private String newWordpressPost(String topic, String body, String appName, String masterPassword) {
+        final AppCredentials myApp = passwordStore.getCredentials(appName, masterPassword);
         return String.format(NEW_WORDPRESS_POST_FORMAT,
                 myApp.getUsername(), myApp.getPassword(),
                 topic, body);
