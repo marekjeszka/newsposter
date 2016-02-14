@@ -6,8 +6,11 @@ import org.mockito.Mockito;
 
 import javax.crypto.BadPaddingException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
@@ -66,8 +69,22 @@ public class PasswordStoreTest {
     }
 
     @Test
-    public void storeCredentialsTest() {
-        
+    public void storeCredentialsTest() throws IOException {
+        final PasswordStore passwordStore = Mockito.spy(new PasswordStore());
+        final Path tempFile = Paths.get("src/test/resources/temp_credentials_test");
+        Files.createFile(tempFile);
+        when(passwordStore.getPasswordPath()).thenReturn(tempFile);
+
+        assertTrue(passwordStore.storeCredentials("testApp", "1234", "5678"));
+        final Optional<String> credentials = Files.lines(tempFile).findFirst();
+        assertTrue(credentials.get().startsWith("testApp"));
+
+        // cleanup
+        try {
+            Files.delete(tempFile);
+        } catch (IOException e) {
+            // ignore
+        }
     }
 
     @Test
