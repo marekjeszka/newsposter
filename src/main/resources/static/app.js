@@ -47,7 +47,7 @@ app.controller('loginController', function($scope, $http, $window) {
 });
 
 app.controller('credentialsController', function($scope, $http, $window) {
-    $scope.init = function() {
+    $scope.initApps = function() {
         $http.get('/apps').then(function successCallback(response) {
             $scope.apps = response.data;
         });
@@ -59,9 +59,11 @@ app.controller('credentialsController', function($scope, $http, $window) {
             username: document.getElementById("username").value,
             password: document.getElementById("password").value
         }
-        $http.post('/credentials', credentialsObj);
+        $http.post('/credentials', credentialsObj).then(function successCallback(response) {
+            $scope.initApps();
+        });
         // TODO close modal after adding
     }
 
-    $scope.init();
+    $scope.initApps();
 });

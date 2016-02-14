@@ -5,6 +5,9 @@ public class AppCredentials {
     String username;
     String password;
 
+    public AppCredentials() {
+    }
+
     public AppCredentials(String appName, String username, String password) {
         this.appName = appName;
         this.username = username;

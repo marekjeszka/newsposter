@@ -65,6 +65,7 @@ public class LoginController {
     @RequestMapping(value = "/credentials", method = RequestMethod.POST)
     public void storeCredentials(@RequestBody AppCredentials appCredentials,
                                  @CookieValue(NewsposterApplication.USER_TOKEN) String token) {
+        // TODO check duplicates
         if (token != null && isAuthorized(token)) {
             try {
                 passwordStore.storeCredentials(
