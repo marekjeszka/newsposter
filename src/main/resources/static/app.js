@@ -1,6 +1,7 @@
 var app = angular.module('myapp', []);
 
 app.controller('posterController', function($scope, $http, $window){
+    // TODO start using Spring filters for redirection
     $scope.init = function() {
         $http.get('/isAuthorized')
             .then(function successCallback(response) { },
@@ -46,6 +47,12 @@ app.controller('loginController', function($scope, $http, $window) {
 });
 
 app.controller('credentialsController', function($scope, $http, $window) {
+    $scope.init = function() {
+        $http.get('/apps').then(function successCallback(response) {
+            $scope.apps = response.data;
+        });
+    }
+
     $scope.storeCredentials = function() {
         var credentialsObj = {
             appName: document.getElementById("appName").value,
@@ -53,5 +60,8 @@ app.controller('credentialsController', function($scope, $http, $window) {
             password: document.getElementById("password").value
         }
         $http.post('/credentials', credentialsObj);
+        // TODO close modal after adding
     }
+
+    $scope.init();
 });

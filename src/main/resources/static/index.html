@@ -29,6 +29,18 @@
                     <h4 class="modal-title">Connected targets</h4>
                 </div>
                 <div class="modal-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>App name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="app in apps">
+                                <td>{{app}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                     <input class="form-control" id="appName" placeholder="application name"/>
                     <input class="form-control" id="username" placeholder="username"/>
                     <input class="form-control" id="password" type="password" placeholder="password"/>
