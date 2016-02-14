@@ -1,4 +1,6 @@
-# newsposter
+# newsposter 
+
+[![Build Status](https://travis-ci.org/marekjeszka/newsposter.svg?branch=master)](https://travis-ci.org/marekjeszka/newsposter)
 
 # Development environment setup
 
