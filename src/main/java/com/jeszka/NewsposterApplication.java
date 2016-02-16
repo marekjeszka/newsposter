@@ -1,5 +1,6 @@
 package com.jeszka;
 
+import com.jeszka.posters.GmailPoster;
 import com.jeszka.posters.WordPressPoster;
 import com.jeszka.security.PasswordStore;
 import org.springframework.boot.SpringApplication;
@@ -13,6 +14,11 @@ public class NewsposterApplication {
     @Bean
     public WordPressPoster wordPressPoster() {
         return new WordPressPoster();
+    }
+
+    @Bean
+    public GmailPoster gmailPoster() {
+        return new GmailPoster();
     }
 
     @Bean

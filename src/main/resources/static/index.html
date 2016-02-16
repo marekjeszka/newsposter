@@ -45,6 +45,12 @@
                     <input class="form-control" id="username" placeholder="username"/>
                     <input class="form-control" id="password" type="password" placeholder="password"/>
                     <button class="btn btn-lg btn-primary btn-block" ng-click="storeCredentials()">Add</button>
+                    <br>
+                    <div class="form-group">
+                        <label for="gmailConfig">Gmail config:</label>
+                        <textarea class="form-control" rows="5" id="gmailConfig"></textarea>
+                    </div>
+                    <button class="btn btn-lg btn-primary btn-block" ng-click="storeGmail()">Add</button>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

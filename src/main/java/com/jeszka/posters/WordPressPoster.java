@@ -52,11 +52,6 @@ public class WordPressPoster implements Poster {
         return UriBuilder.fromUri("http://localhost:8080/wordpress/xmlrpc.php").build();
     }
 
-    @Override
-    public boolean isAuthorized() {
-        return true;
-    }
-
     /**
      * Invokes POST method to create a new post.
      * @param post post to be created
@@ -71,6 +66,12 @@ public class WordPressPoster implements Poster {
                 .toString();
 
         System.out.println(response);
+    }
+
+    @Override
+    public boolean authorize(String authObject) {
+        // no need to authorize
+        return true;
     }
 
     private String newWordpressPost(String topic, String body, String appName, String masterPassword) {

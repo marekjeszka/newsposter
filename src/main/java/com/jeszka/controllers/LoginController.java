@@ -2,6 +2,7 @@ package com.jeszka.controllers;
 
 import com.jeszka.NewsposterApplication;
 import com.jeszka.domain.AppCredentials;
+import com.jeszka.posters.GmailPoster;
 import com.jeszka.security.PasswordStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,9 @@ public class LoginController {
 
     @Autowired
     PasswordStore passwordStore;
+
+    @Autowired
+    GmailPoster gmailPoster;
 
     public boolean isAuthorized(String token) {
         return passwordStore.isAuthorized(token);
@@ -43,7 +47,7 @@ public class LoginController {
 
         final Cookie cookie = newCookie();
         // TODO validate body
-        char[] password = body.get("password");
+        char[] password = body.get("password"); // TODO NPE
         String cookieValue = passwordStore.login(password);
         if (!StringUtils.isEmpty(cookieValue)) {
             cookie.setValue(cookieValue);
@@ -75,6 +79,18 @@ public class LoginController {
             } catch (GeneralSecurityException | UnsupportedEncodingException e) {
                 System.out.println("Error storing credentials " + e);
             }
+        }
+    }
+
+    @RequestMapping(value = "/authorize", method = RequestMethod.POST)
+    public void authorize(@RequestBody String authorizeObject,
+                          @CookieValue(NewsposterApplication.USER_TOKEN) String token) {
+        // TODO check app type, invoke correct poster or merge with credentials endpoint
+        if (!StringUtils.isEmpty(authorizeObject) && token != null && isAuthorized(token)) {
+            if (gmailPoster.authorize(authorizeObject)) {
+                passwordStore.storeCredentials("marek.jeszka@gmail.com", "_", "_"); // TODO e-mail from input
+            }
+            // TODO return result
         }
     }
 }

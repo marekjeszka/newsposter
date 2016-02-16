@@ -22,6 +22,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class PasswordStore {
@@ -33,6 +35,9 @@ public class PasswordStore {
     };
     private static final char SPLIT_CHAR = ':';
     private static final String DEFAULT_LINE = "defaultLine";
+
+    private static final String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+                    + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
 
     private SecretKeyFactory keyFactory;
 
@@ -204,5 +209,9 @@ public class PasswordStore {
             }
         }
         return null;
+    }
+
+    public static boolean isEmail(final String email) {
+        return email.matches(EMAIL_PATTERN);
     }
 }

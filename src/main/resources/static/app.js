@@ -65,5 +65,13 @@ app.controller('credentialsController', function($scope, $http, $window) {
         // TODO close modal after adding
     }
 
+    $scope.storeGmail = function() {
+    // https://console.developers.google.com/apis/credentials
+        var clientJson = document.getElementById("gmailConfig").value;
+        if (clientJson && clientJson.length > 0) {
+            $http.post('/authorize', clientJson);
+        }
+    }
+
     $scope.initApps();
 });

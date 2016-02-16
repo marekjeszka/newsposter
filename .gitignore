@@ -16,3 +16,5 @@ hs_err_pid*
 target
 
 credentials
+credentials_gmail
+client_secret
