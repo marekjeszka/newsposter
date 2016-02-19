@@ -2,8 +2,8 @@ package com.jeszka.posters;
 
 import com.jeszka.domain.Post;
 
-public interface Poster<T> {
+public interface Poster {
     void create(Post post, String appName, String masterPassword);
 
-    boolean authorize(String authObject);
+    String authorize(String email);
 }

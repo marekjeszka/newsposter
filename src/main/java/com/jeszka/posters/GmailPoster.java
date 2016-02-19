@@ -1,11 +1,15 @@
 package com.jeszka.posters;
 
+import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
+import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.BasicAuthentication;
+import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -65,15 +69,53 @@ public class GmailPoster implements Poster {
     private Gmail gmailService;
 
     @Override
-    public boolean authorize(String clientSecret) {
+    public String authorize(String email) {
         try {
-            gmailService = getGmailService(clientSecret);
-            return true;
+            return getAuthorizationUrl(email);
         } catch (IOException e) {
-            System.out.println("Error authorizing Gmail " + e.getMessage());
+            System.out.println("Error authorizing GmailPoster " + e.getMessage());
         }
-        return false;
+        return null;
     }
+
+    /**
+     * https://developers.google.com/api-client-library/java/google-oauth-java-client/oauth2#credential_and_credential_store
+     */
+    private String getAuthorizationUrl(String email) throws IOException {
+
+        final AuthorizationCodeFlow flow = new AuthorizationCodeFlow.Builder(
+                BearerToken.authorizationHeaderAccessMethod(),
+                HTTP_TRANSPORT,
+                JSON_FACTORY,
+                new GenericUrl("https://accounts.google.com/o/oauth2/token"),
+                new BasicAuthentication("25524555561-kq1j6b1cdgkoe5ahru1airv1qrd026ub.apps.googleusercontent.com", "9U0_AxMLLCuVMA57xj5YU4Kb"),
+                "25524555561-kq1j6b1cdgkoe5ahru1airv1qrd026ub.apps.googleusercontent.com",
+                "https://accounts.google.com/o/oauth2/auth")
+                .setDataStoreFactory(DATA_STORE_FACTORY) // TODO don't use file
+                .build();
+
+        return flow.newAuthorizationUrl()
+                   .setRedirectUri("https://agile-plains-30447.herokuapp.com/index.html")
+                   .setScopes(SCOPES)
+                   .setState(email)
+                   .build();
+    }
+
+
+//        final AuthorizationCodeTokenRequest tokenRequest =
+//                flow.newTokenRequest("4/q_kgzR8Tv3tepQKXX1CemxKWQT6nBUtr9I4vkxysuFE#")
+//                    .setRedirectUri("https://agile-plains-30447.herokuapp.com/index.html")
+//                    .setScopes(SCOPES);
+//
+//
+//        try {
+//            final Credential user = flow.createAndStoreCredential(tokenRequest.execute(), "user");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        return null;
+//    }
 
     private Gmail getGmailService(String clientSecret) throws IOException {
         Credential credential = authorizeGmail(clientSecret);

@@ -69,9 +69,9 @@ public class WordPressPoster implements Poster {
     }
 
     @Override
-    public boolean authorize(String authObject) {
+    public String authorize(String email) {
         // no need to authorize
-        return true;
+        return "";
     }
 
     private String newWordpressPost(String topic, String body, String appName, String masterPassword) {

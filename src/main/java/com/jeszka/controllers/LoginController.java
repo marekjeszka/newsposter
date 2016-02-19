@@ -6,6 +6,7 @@ import com.jeszka.posters.GmailPoster;
 import com.jeszka.security.PasswordStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -82,15 +83,13 @@ public class LoginController {
         }
     }
 
-    @RequestMapping(value = "/authorize", method = RequestMethod.POST)
-    public void authorize(@RequestBody String authorizeObject,
-                          @CookieValue(NewsposterApplication.USER_TOKEN) String token) {
-        // TODO check app type, invoke correct poster or merge with credentials endpoint
-        if (!StringUtils.isEmpty(authorizeObject) && token != null && isAuthorized(token)) {
-            if (gmailPoster.authorize(authorizeObject)) {
-                passwordStore.storeCredentials("marek.jeszka@gmail.com", "_", "_"); // TODO e-mail from input
-            }
-            // TODO return result
+    @RequestMapping(value = "/authorize", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> authorize(
+                  @RequestBody String email,
+                  @CookieValue(NewsposterApplication.USER_TOKEN) String token) {
+        if (token != null && isAuthorized(token)) {
+            return new ResponseEntity<>(gmailPoster.authorize(email),HttpStatus.OK);
         }
+        return null;
     }
 }
