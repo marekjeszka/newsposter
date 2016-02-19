@@ -74,6 +74,11 @@ public class WordPressPoster implements Poster {
         return "";
     }
 
+    @Override
+    public void storeCredentials(AppCredentials appCredentials) {
+        // TODO implement
+    }
+
     private String newWordpressPost(String topic, String body, String appName, String masterPassword) {
         final AppCredentials myApp = passwordStore.getCredentials(appName, masterPassword);
         return String.format(NEW_WORDPRESS_POST_FORMAT,

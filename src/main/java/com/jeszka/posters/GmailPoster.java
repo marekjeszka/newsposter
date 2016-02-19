@@ -1,12 +1,9 @@
 package com.jeszka.posters;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
+import com.google.api.client.auth.oauth2.AuthorizationCodeTokenRequest;
 import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.BasicAuthentication;
 import com.google.api.client.http.GenericUrl;
@@ -19,6 +16,7 @@ import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.Draft;
 import com.google.api.services.gmail.model.Message;
+import com.jeszka.domain.AppCredentials;
 import com.jeszka.domain.Post;
 
 import javax.mail.MessagingException;
@@ -28,12 +26,6 @@ import javax.mail.internet.MimeMessage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -44,14 +36,16 @@ public class GmailPoster implements Poster {
 
     private static final File DATA_STORE_DIR = new File("credentials_gmail");
 
-    private static final Path CLIENT_SECRET_PATH = Paths.get("client_secret");
-
     private static FileDataStoreFactory DATA_STORE_FACTORY;
 
     private static final JsonFactory JSON_FACTORY =
             JacksonFactory.getDefaultInstance();
 
     private static HttpTransport HTTP_TRANSPORT;
+
+    private static final String REDIRECT_URL = "https://agile-plains-30447.herokuapp.com/googleAuthorized.html";
+    private static final String TOKEN_ADDRESS = "https://accounts.google.com/o/oauth2/token";
+    private static final String AUTH_ADDRESS = "https://accounts.google.com/o/oauth2/auth";
 
     /** Global instance of the required scopes. */
     private static final List<String> SCOPES =
@@ -67,6 +61,7 @@ public class GmailPoster implements Poster {
     }
 
     private Gmail gmailService;
+    private AuthorizationCodeFlow flow;
 
     @Override
     public String authorize(String email) {
@@ -83,75 +78,54 @@ public class GmailPoster implements Poster {
      */
     private String getAuthorizationUrl(String email) throws IOException {
 
-        final AuthorizationCodeFlow flow = new AuthorizationCodeFlow.Builder(
+        flow = new AuthorizationCodeFlow.Builder(
                 BearerToken.authorizationHeaderAccessMethod(),
                 HTTP_TRANSPORT,
                 JSON_FACTORY,
-                new GenericUrl("https://accounts.google.com/o/oauth2/token"),
-                new BasicAuthentication("25524555561-kq1j6b1cdgkoe5ahru1airv1qrd026ub.apps.googleusercontent.com", "9U0_AxMLLCuVMA57xj5YU4Kb"),
+                new GenericUrl(TOKEN_ADDRESS),
+                new BasicAuthentication("25524555561-kq1j6b1cdgkoe5ahru1airv1qrd026ub.apps.googleusercontent.com", "9U0_AxMLLCuVMA57xj5YU4Kb"), // TODO secret from env
                 "25524555561-kq1j6b1cdgkoe5ahru1airv1qrd026ub.apps.googleusercontent.com",
-                "https://accounts.google.com/o/oauth2/auth")
+                AUTH_ADDRESS)
                 .setDataStoreFactory(DATA_STORE_FACTORY) // TODO don't use file
                 .build();
 
         return flow.newAuthorizationUrl()
-                   .setRedirectUri("https://agile-plains-30447.herokuapp.com/index.html")
+                   .setRedirectUri(REDIRECT_URL)
                    .setScopes(SCOPES)
                    .setState(email)
                    .build();
     }
 
+    @Override
+    public void storeCredentials(AppCredentials appCredentials) {
 
-//        final AuthorizationCodeTokenRequest tokenRequest =
-//                flow.newTokenRequest("4/q_kgzR8Tv3tepQKXX1CemxKWQT6nBUtr9I4vkxysuFE#")
-//                    .setRedirectUri("https://agile-plains-30447.herokuapp.com/index.html")
-//                    .setScopes(SCOPES);
-//
-//
-//        try {
-//            final Credential user = flow.createAndStoreCredential(tokenRequest.execute(), "user");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return null;
-//    }
+        final AuthorizationCodeTokenRequest tokenRequest =
+                flow.newTokenRequest(appCredentials.getPassword())
+                    .setGrantType("authorization_code")
+                    .setRedirectUri(REDIRECT_URL)
+                    .setScopes(SCOPES);
 
-    private Gmail getGmailService(String clientSecret) throws IOException {
-        Credential credential = authorizeGmail(clientSecret);
-        return new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
-                .setApplicationName(APPLICATION_NAME)
-                .build();
-    }
+        try {
+            final Credential credential = flow.createAndStoreCredential(tokenRequest.execute(), appCredentials.getAppName());
+            gmailService = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
+                    .setApplicationName(APPLICATION_NAME)
+                    .build();
 
-    private Credential authorizeGmail(String clientSecret) throws IOException {
-        // store client_secret file, if needed
-        Files.write(CLIENT_SECRET_PATH, clientSecret.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
-
-        // Load client secrets
-        GoogleClientSecrets clientSecrets =
-                GoogleClientSecrets.load(JSON_FACTORY, new StringReader(clientSecret));
-
-        // Build flow and trigger user authorization request.
-        GoogleAuthorizationCodeFlow flow =
-                new GoogleAuthorizationCodeFlow.Builder(
-                        HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-                        .setDataStoreFactory(DATA_STORE_FACTORY)
-                        .setAccessType("offline")
-                        .build();
-        return new AuthorizationCodeInstalledApp(
-                flow, new LocalServerReceiver()).authorize("user");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void create(Post post, String appName, String masterPassword) {
         try {
-            if (gmailService == null) {
-                gmailService =
-                        getGmailService(new String(Files.readAllBytes(CLIENT_SECRET_PATH), StandardCharsets.UTF_8));
+            if (gmailService != null) {
+                createDraft(gmailService, "me", new MimeMessage(
+                    createEmail(appName, appName, post.getTopic(), post.getBody())));
             }
-            createDraft(gmailService, "me", new MimeMessage(
-                createEmail(appName, appName, post.getTopic(), post.getBody())));
+            else {
+                System.out.println("Gmail not yet authorized");
+            }
         } catch (MessagingException | IOException e) {
             System.out.println("Error creating Gmail post " + e.getMessage());
         }

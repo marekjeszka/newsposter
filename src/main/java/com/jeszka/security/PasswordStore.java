@@ -2,6 +2,7 @@ package com.jeszka.security;
 
 import com.jeszka.domain.AppCredentials;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.util.StringUtils;
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 
@@ -22,8 +23,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class PasswordStore {
@@ -212,6 +211,6 @@ public class PasswordStore {
     }
 
     public static boolean isEmail(final String email) {
-        return email.matches(EMAIL_PATTERN);
+        return !StringUtils.isEmpty(email) && email.matches(EMAIL_PATTERN);
     }
 }

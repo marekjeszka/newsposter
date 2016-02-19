@@ -73,10 +73,16 @@ public class LoginController {
         // TODO check duplicates
         if (token != null && isAuthorized(token)) {
             try {
-                passwordStore.storeCredentials(
-                        appCredentials.getAppName(),
-                        passwordStore.encrypt(token, appCredentials.getUsername()),
-                        passwordStore.encrypt(token, appCredentials.getPassword()));
+                if (PasswordStore.isEmail(appCredentials.getAppName())) {
+                    gmailPoster.storeCredentials(appCredentials);
+                }
+                else {
+                    // TODO invoke method for Wordpress
+                    passwordStore.storeCredentials(
+                            appCredentials.getAppName(),
+                            passwordStore.encrypt(token, appCredentials.getUsername()),
+                            passwordStore.encrypt(token, appCredentials.getPassword()));
+                }
             } catch (GeneralSecurityException | UnsupportedEncodingException e) {
                 System.out.println("Error storing credentials " + e);
             }

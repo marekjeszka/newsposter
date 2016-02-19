@@ -74,3 +74,34 @@ app.controller('credentialsController', function($scope, $http, $window) {
 
     $scope.initApps();
 });
+
+app.controller('googleController', function($scope, $http, $window, $location) {
+    function getParam(param) {
+        var vars = {};
+        window.location.href.replace( location.hash, '' ).replace(
+            /[?&]+([^=&]+)=?([^&]*)?/gi, // regexp
+            function( m, key, value ) { // callback
+                vars[key] = value !== undefined ? value : '';
+            }
+        );
+
+        if ( param ) {
+            return vars[param] ? vars[param] : null;
+        }
+        return vars;
+    }
+
+    $scope.requestToken = function() {
+        var credentialsObj = {
+            appName: getParam('state'),
+            username: null,
+            password: getParam('code')
+        }
+        $http.post('/credentials', credentialsObj).
+            then(function successCallback(response) {
+                $window.close();
+            });
+    }
+
+    $scope.requestToken();
+});
