@@ -26,8 +26,8 @@ public class NewPostsController {
     @RequestMapping(value = "/post", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     public void newPost(@RequestBody Post post, @CookieValue(NewsposterApplication.USER_TOKEN) String token) {
         // TODO start using logging framework
-        System.out.println("Posting...");
         final List<String> storedApps = passwordStore.getStoredApps();
+        System.out.println("Posting... no of apps: " + storedApps.size());
         for (String app : storedApps) {
             if (PasswordStore.isEmail(app)) {
                 gmailPoster.create(post, app, null);

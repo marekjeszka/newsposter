@@ -12,6 +12,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.Base64;
 import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.client.util.store.MemoryDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.Draft;
@@ -90,7 +91,7 @@ public class GmailPoster implements Poster {
                 new BasicAuthentication(System.getenv(GMAIL_CLIENT_ID), System.getenv(GMAIL_CLIENT_SECRET)),
                 System.getenv(GMAIL_CLIENT_ID),
                 AUTH_ADDRESS)
-                .setDataStoreFactory(DATA_STORE_FACTORY) // TODO don't use file
+                .setDataStoreFactory(DATA_STORE_FACTORY) // TODO don't in memory data store
                 .build();
 
         return flow.newAuthorizationUrl()

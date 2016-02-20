@@ -41,6 +41,7 @@ public class LoginController {
             @RequestBody Map<String, char[]> body,
             @CookieValue(value = NewsposterApplication.USER_TOKEN, required = false) String token,
             HttpServletResponse response) {
+        // TODO handle creating new password
         // check if is already authorized
         if (token != null && isAuthorized(token)) {
             return new ResponseEntity<>(HttpStatus.OK);
@@ -68,25 +69,34 @@ public class LoginController {
     }
 
     @RequestMapping(value = "/credentials", method = RequestMethod.POST)
-    public void storeCredentials(@RequestBody AppCredentials appCredentials,
+    public ResponseEntity storeCredentials(@RequestBody AppCredentials appCredentials,
                                  @CookieValue(NewsposterApplication.USER_TOKEN) String token) {
         // TODO check duplicates
         if (token != null && isAuthorized(token)) {
             try {
+                boolean result = false;
                 if (PasswordStore.isEmail(appCredentials.getAppName())) {
-                    gmailPoster.storeCredentials(appCredentials);
+                    if (gmailPoster.storeCredentials(appCredentials)) {
+                        // TODO do it inside gmail poster
+                        result = passwordStore.storeCredentials(
+                                appCredentials.getAppName(), "", "");
+                    }
                 }
                 else {
                     // TODO invoke method for Wordpress
-                    passwordStore.storeCredentials(
+                    result = passwordStore.storeCredentials(
                             appCredentials.getAppName(),
                             passwordStore.encrypt(token, appCredentials.getUsername()),
                             passwordStore.encrypt(token, appCredentials.getPassword()));
                 }
+                return result ? ResponseEntity.ok().build() : ResponseEntity.badRequest().build();
             } catch (GeneralSecurityException | UnsupportedEncodingException e) {
-                System.out.println("Error storing credentials " + e);
+                final String errorMessage = "Error storing credentials " + e;
+                System.out.println(errorMessage);
+                return ResponseEntity.badRequest().body(errorMessage);
             }
         }
+        return ResponseEntity.badRequest().body("User token cookie is missing");
     }
 
     @RequestMapping(value = "/authorize", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
