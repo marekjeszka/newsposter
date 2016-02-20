@@ -26,7 +26,7 @@ import javax.mail.internet.MimeMessage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -46,15 +46,19 @@ public class GmailPoster implements Poster {
     private static final String REDIRECT_URL = "https://agile-plains-30447.herokuapp.com/googleAuthorized.html";
     private static final String TOKEN_ADDRESS = "https://accounts.google.com/o/oauth2/token";
     private static final String AUTH_ADDRESS = "https://accounts.google.com/o/oauth2/auth";
+    private static final String GMAIL_CLIENT_ID = "GMAIL_CLIENT_ID";
+    private static final String GMAIL_CLIENT_SECRET = "GMAIL_CLIENT_SECRET";
 
     /** Global instance of the required scopes. */
     private static final List<String> SCOPES =
-            Arrays.asList(GmailScopes.GMAIL_COMPOSE, GmailScopes.GMAIL_MODIFY, GmailScopes.MAIL_GOOGLE_COM);
+            Collections.singletonList(GmailScopes.GMAIL_COMPOSE);
 
     static {
         try {
             HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
             DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
+            System.getenv(GMAIL_CLIENT_ID);
+            System.getenv(GMAIL_CLIENT_SECRET);
         } catch (Throwable t) {
             System.out.println("Error initializing GmailPoster " + t.getMessage());
         }
@@ -83,8 +87,8 @@ public class GmailPoster implements Poster {
                 HTTP_TRANSPORT,
                 JSON_FACTORY,
                 new GenericUrl(TOKEN_ADDRESS),
-                new BasicAuthentication("25524555561-kq1j6b1cdgkoe5ahru1airv1qrd026ub.apps.googleusercontent.com", "9U0_AxMLLCuVMA57xj5YU4Kb"), // TODO secret from env
-                "25524555561-kq1j6b1cdgkoe5ahru1airv1qrd026ub.apps.googleusercontent.com",
+                new BasicAuthentication(System.getenv(GMAIL_CLIENT_ID), System.getenv(GMAIL_CLIENT_SECRET)),
+                System.getenv(GMAIL_CLIENT_ID),
                 AUTH_ADDRESS)
                 .setDataStoreFactory(DATA_STORE_FACTORY) // TODO don't use file
                 .build();
@@ -97,7 +101,12 @@ public class GmailPoster implements Poster {
     }
 
     @Override
-    public void storeCredentials(AppCredentials appCredentials) {
+    public boolean storeCredentials(AppCredentials appCredentials) {
+
+        if (flow == null) {
+            System.out.println("Can't store credentials, not yet authorized");
+            return false;
+        }
 
         final AuthorizationCodeTokenRequest tokenRequest =
                 flow.newTokenRequest(appCredentials.getPassword())
@@ -110,9 +119,11 @@ public class GmailPoster implements Poster {
             gmailService = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
                     .setApplicationName(APPLICATION_NAME)
                     .build();
+            return true;
 
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Error creating Gmail credential " + e);
+            return false;
         }
     }
 
@@ -124,10 +135,10 @@ public class GmailPoster implements Poster {
                     createEmail(appName, appName, post.getTopic(), post.getBody())));
             }
             else {
-                System.out.println("Gmail not yet authorized");
+                System.out.println("Cannot create e-mail, Gmail not yet authorized");
             }
         } catch (MessagingException | IOException e) {
-            System.out.println("Error creating Gmail post " + e.getMessage());
+            System.out.println("Error creating Gmail e-mail " + e.getMessage());
         }
     }
 

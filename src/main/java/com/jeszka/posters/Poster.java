@@ -8,5 +8,5 @@ public interface Poster {
 
     String authorize(String email);
 
-    void storeCredentials(AppCredentials appCredentials);
+    boolean storeCredentials(AppCredentials appCredentials);
 }

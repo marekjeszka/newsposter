@@ -75,8 +75,9 @@ public class WordPressPoster implements Poster {
     }
 
     @Override
-    public void storeCredentials(AppCredentials appCredentials) {
+    public boolean storeCredentials(AppCredentials appCredentials) {
         // TODO implement
+        return true;
     }
 
     private String newWordpressPost(String topic, String body, String appName, String masterPassword) {
