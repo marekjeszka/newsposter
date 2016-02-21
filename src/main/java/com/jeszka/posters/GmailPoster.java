@@ -12,7 +12,6 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.Base64;
 import com.google.api.client.util.store.FileDataStoreFactory;
-import com.google.api.client.util.store.MemoryDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.Draft;
@@ -44,14 +43,14 @@ public class GmailPoster implements Poster {
 
     private static HttpTransport HTTP_TRANSPORT;
 
-    private static final String REDIRECT_URL = "https://agile-plains-30447.herokuapp.com/googleAuthorized.html";
+    static final String REDIRECT_URL = "https://agile-plains-30447.herokuapp.com/googleAuthorized.html";
     private static final String TOKEN_ADDRESS = "https://accounts.google.com/o/oauth2/token";
     private static final String AUTH_ADDRESS = "https://accounts.google.com/o/oauth2/auth";
     private static final String GMAIL_CLIENT_ID = "GMAIL_CLIENT_ID";
     private static final String GMAIL_CLIENT_SECRET = "GMAIL_CLIENT_SECRET";
+    static final String GRANT_TYPE = "authorization_code";
 
-    /** Global instance of the required scopes. */
-    private static final List<String> SCOPES =
+    static final List<String> SCOPES =
             Collections.singletonList(GmailScopes.GMAIL_COMPOSE);
 
     static {
@@ -104,19 +103,20 @@ public class GmailPoster implements Poster {
     @Override
     public boolean storeCredentials(AppCredentials appCredentials) {
 
-        if (flow == null) {
+        if (getFlow() == null) {
             System.out.println("Can't store credentials, not yet authorized");
             return false;
         }
 
         final AuthorizationCodeTokenRequest tokenRequest =
-                flow.newTokenRequest(appCredentials.getPassword())
-                    .setGrantType("authorization_code")
-                    .setRedirectUri(REDIRECT_URL)
-                    .setScopes(SCOPES);
+                getFlow().newTokenRequest(appCredentials.getPassword())
+                         .setGrantType(GRANT_TYPE)
+                         .setRedirectUri(REDIRECT_URL)
+                         .setScopes(SCOPES);
 
         try {
-            final Credential credential = flow.createAndStoreCredential(tokenRequest.execute(), appCredentials.getAppName());
+            final Credential credential =
+                    getFlow().createAndStoreCredential(tokenRequest.execute(), appCredentials.getAppName());
             gmailService = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
                     .setApplicationName(APPLICATION_NAME)
                     .build();
@@ -176,5 +176,9 @@ public class GmailPoster implements Poster {
         email.setSubject(subject);
         email.setText(bodyText);
         return email;
+    }
+
+    AuthorizationCodeFlow getFlow() {
+        return flow;
     }
 }
