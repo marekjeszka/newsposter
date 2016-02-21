@@ -18,6 +18,8 @@ import com.google.api.services.gmail.model.Draft;
 import com.google.api.services.gmail.model.Message;
 import com.jeszka.domain.AppCredentials;
 import com.jeszka.domain.Post;
+import com.jeszka.security.PasswordStore;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -32,6 +34,9 @@ import java.util.Properties;
 
 public class GmailPoster implements Poster {
 
+    @Autowired
+    PasswordStore passwordStore;
+
     private static final String APPLICATION_NAME = "GmailPoster";
 
     private static final File DATA_STORE_DIR = new File("credentials_gmail");
@@ -44,10 +49,10 @@ public class GmailPoster implements Poster {
     private static HttpTransport HTTP_TRANSPORT;
 
     static final String REDIRECT_URL = "https://agile-plains-30447.herokuapp.com/googleAuthorized.html";
-    private static final String TOKEN_ADDRESS = "https://accounts.google.com/o/oauth2/token";
-    private static final String AUTH_ADDRESS = "https://accounts.google.com/o/oauth2/auth";
-    private static final String GMAIL_CLIENT_ID = "GMAIL_CLIENT_ID";
-    private static final String GMAIL_CLIENT_SECRET = "GMAIL_CLIENT_SECRET";
+    static final String TOKEN_ADDRESS = "https://accounts.google.com/o/oauth2/token";
+    static final String AUTH_ADDRESS = "https://accounts.google.com/o/oauth2/auth";
+    static final String GMAIL_CLIENT_ID = "GMAIL_CLIENT_ID";
+    static final String GMAIL_CLIENT_SECRET = "GMAIL_CLIENT_SECRET";
     static final String GRANT_TYPE = "authorization_code";
 
     static final List<String> SCOPES =
@@ -120,7 +125,7 @@ public class GmailPoster implements Poster {
             gmailService = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
                     .setApplicationName(APPLICATION_NAME)
                     .build();
-            return true;
+            return passwordStore.storeCredentials(appCredentials.getAppName(), "", "");
 
         } catch (IOException e) {
             System.out.println("Error creating Gmail credential " + e);

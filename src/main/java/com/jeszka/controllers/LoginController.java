@@ -74,13 +74,9 @@ public class LoginController {
         // TODO check duplicates
         if (token != null && isAuthorized(token)) {
             try {
-                boolean result = false;
+                boolean result;
                 if (PasswordStore.isEmail(appCredentials.getAppName())) {
-                    if (gmailPoster.storeCredentials(appCredentials)) {
-                        // TODO do it inside gmail poster
-                        result = passwordStore.storeCredentials(
-                                appCredentials.getAppName(), "", "");
-                    }
+                    result = gmailPoster.storeCredentials(appCredentials);
                 }
                 else {
                     // TODO invoke method for Wordpress

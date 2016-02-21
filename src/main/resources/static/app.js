@@ -14,6 +14,7 @@ app.controller('posterController', function($scope, $http, $window){
             body: document.getElementById("postBody").value
         }
         $http.post('/post', postObj);
+        // TODO provide some confirmation
     }
 
     $scope.init();

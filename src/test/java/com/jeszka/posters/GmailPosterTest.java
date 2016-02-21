@@ -5,8 +5,10 @@ import com.google.api.client.auth.oauth2.AuthorizationCodeTokenRequest;
 import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.auth.oauth2.Credential;
 import com.jeszka.domain.AppCredentials;
+import com.jeszka.security.PasswordStore;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -20,12 +22,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class GmailPosterTest {
+    @InjectMocks
+    GmailPoster gmailPoster;
 
     @Mock
     AuthorizationCodeFlow flow;
 
     @Mock
     AuthorizationCodeTokenRequest tokenRequest;
+
+    @Mock
+    PasswordStore passwordStore;
 
     @Before
     public void setUp() {
@@ -47,7 +54,7 @@ public class GmailPosterTest {
         final String password = "pass123";
         appCredentials.setAppName(myApplication);
         appCredentials.setPassword(password);
-        GmailPoster gmailPoster = Mockito.spy(new GmailPoster());
+        GmailPoster gmailPoster = Mockito.spy(this.gmailPoster);
         when(gmailPoster.getFlow()).thenReturn(flow);
         when(flow.newTokenRequest(anyString())).thenReturn(tokenRequest);
         when(flow.createAndStoreCredential(any(), anyString())).thenReturn(
@@ -55,13 +62,16 @@ public class GmailPosterTest {
         when(tokenRequest.setGrantType(anyString())).thenReturn(tokenRequest);
         when(tokenRequest.setRedirectUri(anyString())).thenReturn(tokenRequest);
         when(tokenRequest.setScopes(any())).thenReturn(tokenRequest);
+        when(passwordStore.storeCredentials(myApplication, "", "")).thenReturn(true);
 
         assertTrue(gmailPoster.storeCredentials(appCredentials));
+
         verify(flow).newTokenRequest(password);
         verify(flow).createAndStoreCredential(any(), eq(myApplication));
         verify(tokenRequest).setGrantType(GmailPoster.GRANT_TYPE);
         verify(tokenRequest).setRedirectUri(GmailPoster.REDIRECT_URL);
         verify(tokenRequest).setScopes(GmailPoster.SCOPES);
+        verify(passwordStore).storeCredentials(eq(myApplication), eq(""), eq(""));
     }
 
 }
