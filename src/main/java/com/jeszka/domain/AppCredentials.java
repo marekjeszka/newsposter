@@ -16,13 +16,6 @@ public class AppCredentials {
     public AppCredentials() {
     }
 
-    public AppCredentials(String appName, String username, String password) {
-        this.appName = appName;
-        this.username = username;
-        this.password = password;
-        this.enabled = enabled;
-    }
-
     private AppCredentials(Builder builder) {
         setId(builder.id);
         setAppName(builder.appName);
@@ -63,7 +56,7 @@ public class AppCredentials {
         this.password = password;
     }
 
-    public boolean isEnabled() {
+    public boolean getEnabled() {
         return enabled;
     }
 

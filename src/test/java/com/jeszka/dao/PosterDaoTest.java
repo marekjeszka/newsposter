@@ -83,7 +83,7 @@ public class PosterDaoTest {
         assertEquals(appName, wordpress_1.getAppName());
         assertEquals("word_hash", wordpress_1.getUsername());
         assertEquals("word_pass_hash", wordpress_1.getPassword());
-        assertEquals(true, wordpress_1.isEnabled());
+        assertEquals(true, wordpress_1.getEnabled());
     }
 
     @Test

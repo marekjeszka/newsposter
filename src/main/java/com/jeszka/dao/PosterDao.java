@@ -2,6 +2,7 @@ package com.jeszka.dao;
 
 import com.jeszka.domain.AppCredentials;
 import com.jeszka.security.PasswordStore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 @Repository
 public class PosterDao {
+    @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     public void setNamedParameterJdbcTemplate(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
@@ -38,11 +40,12 @@ public class PosterDao {
     }
 
     public List<String> findAllActiveAppNames() {
-        String sql = "SELECT appName FROM app_credentials WHERE enabled = 1";
+        String sql = "SELECT appName FROM app_credentials WHERE enabled = 't'";
         return namedParameterJdbcTemplate.query(sql, (rs, rowNum) -> rs.getString(AppCredentials.APP_NAME));
     }
 
     public int saveAppCredentials(AppCredentials appCredentials) {
+        // TODO check uniqueness
         String sql = "INSERT INTO app_credentials " +
                 "(appName, username, password, enabled)" +
                 "VALUES (:appName, :username, :password, :enabled)";
@@ -50,7 +53,7 @@ public class PosterDao {
         params.put(AppCredentials.APP_NAME, appCredentials.getAppName());
         params.put(AppCredentials.USERNAME, appCredentials.getUsername());
         params.put(AppCredentials.PASSWORD, appCredentials.getPassword());
-        params.put(AppCredentials.ENABLED, appCredentials.isEnabled());
+        params.put(AppCredentials.ENABLED, appCredentials.getEnabled());
         return namedParameterJdbcTemplate.update(sql, params);
     }
 
@@ -60,7 +63,22 @@ public class PosterDao {
                                    .username(rs.getString(AppCredentials.USERNAME))
                                    .password(rs.getString(AppCredentials.PASSWORD))
                                    // TODO appCredentials.setType();
-                                   .enabled(rs.getBoolean(AppCredentials.ENABLED))
+                                   .enabled(getEnabled(rs.getString(AppCredentials.ENABLED)))
                                    .build();
+    }
+
+    private static boolean getEnabled(String string) throws SQLException {
+        switch (string) {
+            case "t":
+            case "TRUE":
+            case "1":
+                return true;
+            case "f":
+            case "FALSE":
+            case "0":
+                return false;
+            default:
+                return true;
+        }
     }
 }
