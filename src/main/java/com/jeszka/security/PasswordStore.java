@@ -26,6 +26,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PasswordStore {
+    public static final String DEFAULT_LINE = "defaultLine";
+
     private static final String PASSWORDS_FILENAME = "credentials";
     private static final String ALGORITHM = "PBEWithMD5AndDES";
     private static final byte[] SALT = {
@@ -33,7 +35,6 @@ public class PasswordStore {
             (byte) 0xde, (byte) 0x33, (byte) 0x10, (byte) 0x12,
     };
     private static final char SPLIT_CHAR = ':';
-    private static final String DEFAULT_LINE = "defaultLine";
 
     private static final String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
                     + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
