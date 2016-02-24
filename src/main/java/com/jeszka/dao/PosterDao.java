@@ -63,11 +63,11 @@ public class PosterDao {
                                    .username(rs.getString(AppCredentials.USERNAME))
                                    .password(rs.getString(AppCredentials.PASSWORD))
                                    // TODO appCredentials.setType();
-                                   .enabled(getEnabled(rs.getString(AppCredentials.ENABLED)))
+                                   .enabled(getBoolean(rs.getString(AppCredentials.ENABLED)))
                                    .build();
     }
 
-    private static boolean getEnabled(String string) throws SQLException {
+    private static boolean getBoolean(String string) throws SQLException {
         switch (string) {
             case "t":
             case "TRUE":
