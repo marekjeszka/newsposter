@@ -45,7 +45,6 @@ public class PosterDao {
     }
 
     public int saveAppCredentials(AppCredentials appCredentials) {
-        // TODO check uniqueness
         String sql = "INSERT INTO app_credentials " +
                 "(appName, username, password, enabled)" +
                 "VALUES (:appName, :username, :password, :enabled)";

@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.List;
 
@@ -33,6 +34,7 @@ public class PosterDaoTest {
     public void testFindAllActiveAppNames() {
         embeddedDatabase = new EmbeddedDatabaseBuilder()
                 .setType(EmbeddedDatabaseType.H2)
+                .generateUniqueName(true)
                 .addScripts("db/sql/create-db.sql", "db/sql/insert-data.sql")
                 .build();
         PosterDao posterDao = preparePosterDao();
@@ -46,6 +48,7 @@ public class PosterDaoTest {
     public void testFindDefault_fail() {
         embeddedDatabase = new EmbeddedDatabaseBuilder()
                 .setType(EmbeddedDatabaseType.H2)
+                .generateUniqueName(true)
                 .addScripts("db/sql/create-db.sql", "db/sql/insert-data-no_default.sql")
                 .build();
         PosterDao posterDao = preparePosterDao();
@@ -58,6 +61,7 @@ public class PosterDaoTest {
     public void testFindDefault() {
         embeddedDatabase = new EmbeddedDatabaseBuilder()
                 .setType(EmbeddedDatabaseType.H2)
+                .generateUniqueName(true)
                 .addScripts("db/sql/create-db.sql", "db/sql/insert-data.sql")
                 .build();
         PosterDao posterDao = preparePosterDao();
@@ -73,6 +77,7 @@ public class PosterDaoTest {
         final String appName = "wordpress_1";
         embeddedDatabase = new EmbeddedDatabaseBuilder()
                 .setType(EmbeddedDatabaseType.H2)
+                .generateUniqueName(true)
                 .addScripts("db/sql/create-db.sql", "db/sql/insert-data.sql")
                 .build();
         PosterDao posterDao = preparePosterDao();
@@ -98,6 +103,7 @@ public class PosterDaoTest {
                                             .build();
         embeddedDatabase = new EmbeddedDatabaseBuilder()
                 .setType(EmbeddedDatabaseType.H2)
+                .generateUniqueName(true)
                 .addScripts("db/sql/create-db.sql", "db/sql/insert-data.sql")
                 .build();
         PosterDao posterDao = preparePosterDao();
