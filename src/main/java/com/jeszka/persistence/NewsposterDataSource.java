@@ -1,18 +1,15 @@
-package com.jeszka.db;
+package com.jeszka.persistence;
 
 
 import org.apache.commons.dbcp.BasicDataSource;
-import org.h2.jdbcx.JdbcDataSource;
-import org.h2.tools.Server;
-import org.springframework.context.annotation.*;
-import org.springframework.core.type.AnnotatedTypeMetadata;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 import javax.sql.DataSource;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.sql.SQLException;
 
 @Configuration
 public class NewsposterDataSource {
@@ -44,19 +41,4 @@ public class NewsposterDataSource {
     private boolean isDatabaseURL() {
         return System.getenv("DATABASE_URL") != null;
     }
-
-//    @Bean(initMethod = "start", destroyMethod = "stop")
-//    public Server startDBManager() throws SQLException {
-//        return Server.createWebServer();
-//    }
-
-//    private class PostgresCondition implements Condition {
-//        public PostgresCondition() {
-//        }
-//
-//        @Override
-//        public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-//            return isDatabaseURL();
-//        }
-//    }
 }

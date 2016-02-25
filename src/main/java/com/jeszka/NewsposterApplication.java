@@ -1,5 +1,7 @@
 package com.jeszka;
 
+import com.google.api.client.util.store.DataStoreFactory;
+import com.jeszka.persistence.S3DataStoreFactory;
 import com.jeszka.posters.GmailPoster;
 import com.jeszka.posters.WordPressPoster;
 import com.jeszka.security.PasswordStore;
@@ -35,6 +37,14 @@ public class NewsposterApplication {
 
     @Bean
     public PasswordStore passwordStore() { return new PasswordStore(); }
+
+    @Bean
+    public DataStoreFactory dataStoreFactory() {
+        return new S3DataStoreFactory(
+                System.getenv("AWS_ACCESS_KEY_ID"),
+                System.getenv("AWS_SECRET_ACCESS_KEY"),
+                System.getenv("S3_BUCKET_NAME"));
+    }
 
     public static void main(String[] args) {
         SpringApplication.run(NewsposterApplication.class, args);
