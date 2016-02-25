@@ -1,9 +1,7 @@
 package com.jeszka.posters;
 
-import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
-import com.google.api.client.auth.oauth2.AuthorizationCodeTokenRequest;
-import com.google.api.client.auth.oauth2.BearerToken;
-import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.auth.oauth2.*;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.BasicAuthentication;
 import com.google.api.client.http.GenericUrl;
@@ -11,6 +9,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.Base64;
+import com.google.api.client.util.store.DataStore;
 import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
@@ -27,6 +26,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -64,6 +64,7 @@ public class GmailPoster implements Poster {
         }
     }
 
+    // TODO how to handle multiple google accounts? gmail service creation each time from scratch?
     private Gmail gmailService;
     private AuthorizationCodeFlow flow;
 
@@ -131,6 +132,10 @@ public class GmailPoster implements Poster {
     @Override
     public void create(Post post, String appName, String masterPassword) {
         try {
+            if (gmailService == null) {
+                initGmailFromStoredCredential(appName);
+            }
+
             if (gmailService != null) {
                 createDraft(gmailService, "me", new MimeMessage(
                     createEmail(appName, appName, post.getTopic(), post.getBody())));
@@ -140,6 +145,22 @@ public class GmailPoster implements Poster {
             }
         } catch (MessagingException | IOException e) {
             System.out.println("Error creating Gmail e-mail " + e.getMessage());
+        }
+    }
+
+    private void initGmailFromStoredCredential(String appName) throws IOException {
+        // TODO handle this during initialization
+        final DataStore<Serializable> dataStore = dataStoreFactory.getDataStore(StoredCredential.DEFAULT_DATA_STORE_ID);
+        if (dataStore.containsKey(appName)) {
+            final StoredCredential storedCredential = (StoredCredential) dataStore.get(appName);
+            GoogleCredential credential = new GoogleCredential.Builder()
+                    .setTransport(HTTP_TRANSPORT)
+                    .setJsonFactory(JSON_FACTORY)
+                    .setClientSecrets(System.getenv(GMAIL_CLIENT_ID), System.getenv(GMAIL_CLIENT_SECRET)).build();
+            credential.setAccessToken(storedCredential.getAccessToken());
+            gmailService = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
+                    .setApplicationName(APPLICATION_NAME)
+                    .build();
         }
     }
 
