@@ -1,7 +1,5 @@
 package com.jeszka.persistence;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.*;
 import com.google.api.client.util.IOUtils;
@@ -11,6 +9,7 @@ import com.google.api.client.util.Preconditions;
 import com.google.api.client.util.store.AbstractDataStore;
 import com.google.api.client.util.store.AbstractDataStoreFactory;
 import com.google.api.client.util.store.DataStore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.SerializationUtils;
 
 import java.io.ByteArrayInputStream;
@@ -22,39 +21,33 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class S3DataStoreFactory extends AbstractDataStoreFactory {
-    private String accessKey;
-    private String secretKey;
+    @Autowired
+    AmazonS3Client amazonS3Client;
     private String bucketName;
 
-    public S3DataStoreFactory(String accessKey, String secretKey, String bucketName) {
-        this.accessKey = accessKey;
-        this.secretKey = secretKey;
+    public S3DataStoreFactory(String bucketName) {
         this.bucketName = bucketName;
     }
 
+
     @Override
     protected <V extends Serializable> S3DataStore<V> createDataStore(String id) throws IOException {
-        return new S3DataStore<>(this, id, accessKey, secretKey, bucketName);
+        return new S3DataStore<>(this, id);
     }
 
-    private class S3DataStore<V extends Serializable> extends AbstractDataStore<V> {
+    class S3DataStore<V extends Serializable> extends AbstractDataStore<V> {
         private static final String FILE_NAME = "credentials_gmail";
 
         private final ReadWriteLock lock = new ReentrantReadWriteLock();
         private HashMap<String, byte[]> keyValueMap = Maps.newHashMap();
 
-        private final AmazonS3Client amazonS3;
-
-        public S3DataStore(S3DataStoreFactory s3DataStoreFactory, String id, String accessKey, String secretKey, String bucketName) throws IOException {
+        public S3DataStore(S3DataStoreFactory s3DataStoreFactory, String id) throws IOException {
             super(s3DataStoreFactory, id);
-
-            AWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
-            amazonS3 = new AmazonS3Client(awsCredentials);
 
             GetObjectRequest request = new GetObjectRequest(bucketName, FILE_NAME);
             final S3Object object;
             try {
-                object = amazonS3.getObject(request);
+                object = amazonS3Client.getObject(request);
                 // get credentials from S3 file
                 keyValueMap = IOUtils.deserialize(object.getObjectContent());
             } catch (AmazonS3Exception e) {
@@ -150,7 +143,7 @@ public class S3DataStoreFactory extends AbstractDataStoreFactory {
                     FILE_NAME,
                     inputStream,
                     null);
-            final PutObjectResult putObjectResult = amazonS3.putObject(putRequest);
+            final PutObjectResult putObjectResult = amazonS3Client.putObject(putRequest);
             System.out.println("Result storing to S3: " + putObjectResult.getETag());
         }
     }
