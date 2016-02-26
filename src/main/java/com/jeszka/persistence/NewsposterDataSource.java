@@ -2,10 +2,13 @@ package com.jeszka.persistence;
 
 
 import org.apache.commons.dbcp.BasicDataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
+import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 import java.net.URI;
@@ -13,6 +16,9 @@ import java.net.URISyntaxException;
 
 @Configuration
 public class NewsposterDataSource {
+
+    @Autowired
+    Environment env;
 
     public static final String DATABASE_URL = "DATABASE_URL";
 
@@ -39,6 +45,6 @@ public class NewsposterDataSource {
     }
 
     private boolean isDatabaseURL() {
-        return System.getenv("DATABASE_URL") != null;
+        return !StringUtils.isEmpty(env.getProperty(DATABASE_URL));
     }
 }
