@@ -11,6 +11,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 
@@ -55,17 +56,17 @@ public class WordPressPoster implements Poster {
     /**
      * Invokes POST method to create a new post.
      * @param post post to be created
-     * @param masterPassword password to encode credentials stored in file
+     * @param masterPassword password to encode stored credentials
      */
-    public void create(Post post, String appName, String masterPassword) {
+    public boolean create(Post post, String appName, String masterPassword) {
         String postAsString = newWordpressPost(post.getTopic(), post.getBody(), appName, masterPassword);
 
-        String response = target
+        Response response = target
                 .request()
-                .post(Entity.entity(postAsString, MediaType.TEXT_XML))
-                .toString();
+                .post(Entity.entity(postAsString, MediaType.TEXT_XML));
 
-        System.out.println(response);
+        System.out.println("Wordpress post creation: " + response);
+        return response.getStatus() == Response.Status.OK.getStatusCode();
     }
 
     @Override

@@ -1,10 +1,12 @@
 package com.jeszka.posters;
 
-import com.google.api.client.auth.oauth2.*;
+import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
+import com.google.api.client.auth.oauth2.AuthorizationCodeTokenRequest;
+import com.google.api.client.auth.oauth2.StoredCredential;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.BasicAuthentication;
-import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -19,6 +21,7 @@ import com.jeszka.domain.AppCredentials;
 import com.jeszka.domain.Post;
 import com.jeszka.security.PasswordStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -32,6 +35,9 @@ import java.util.List;
 import java.util.Properties;
 
 public class GmailPoster implements Poster {
+
+    @Autowired
+    Environment env;
 
     @Autowired
     PasswordStore passwordStore;
@@ -64,8 +70,6 @@ public class GmailPoster implements Poster {
         }
     }
 
-    // TODO how to handle multiple google accounts? gmail service creation each time from scratch?
-    private Gmail gmailService;
     private AuthorizationCodeFlow flow;
 
     @Override
@@ -83,21 +87,22 @@ public class GmailPoster implements Poster {
      */
     private String getAuthorizationUrl(String email) throws IOException {
 
-        flow = new AuthorizationCodeFlow.Builder(
-                BearerToken.authorizationHeaderAccessMethod(),
+        flow = new GoogleAuthorizationCodeFlow.Builder(
                 HTTP_TRANSPORT,
                 JSON_FACTORY,
-                new GenericUrl(TOKEN_ADDRESS),
-                new BasicAuthentication(System.getenv(GMAIL_CLIENT_ID), System.getenv(GMAIL_CLIENT_SECRET)),
                 System.getenv(GMAIL_CLIENT_ID),
-                AUTH_ADDRESS)
+                System.getenv(GMAIL_CLIENT_SECRET),
+                SCOPES)
                 .setDataStoreFactory(dataStoreFactory)
                 .build();
 
-        return flow.newAuthorizationUrl()
+        final GoogleAuthorizationCodeRequestUrl authorizationCodeRequestUrl =
+                (GoogleAuthorizationCodeRequestUrl) flow.newAuthorizationUrl();
+        return authorizationCodeRequestUrl
                    .setRedirectUri(REDIRECT_URL)
                    .setScopes(SCOPES)
                    .setState(email)
+                   .setAccessType("offline")
                    .build();
     }
 
@@ -116,11 +121,8 @@ public class GmailPoster implements Poster {
                          .setScopes(SCOPES);
 
         try {
-            final Credential credential =
-                    getFlow().createAndStoreCredential(tokenRequest.execute(), appCredentials.getAppName());
-            gmailService = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
-                    .setApplicationName(APPLICATION_NAME)
-                    .build();
+
+            getFlow().createAndStoreCredential(tokenRequest.execute(), appCredentials.getAppName());
             return passwordStore.storeCredentials(appCredentials.getAppName(), "", "");
 
         } catch (IOException e) {
@@ -130,46 +132,52 @@ public class GmailPoster implements Poster {
     }
 
     @Override
-    public void create(Post post, String appName, String masterPassword) {
+    public boolean create(Post post, String appName, String masterPassword) {
         try {
+            Gmail gmailService = initGmailFromStoredCredential(appName);
             if (gmailService == null) {
-                initGmailFromStoredCredential(appName);
-            }
-
-            if (gmailService != null) {
-                createDraft(gmailService, "me", new MimeMessage(
-                    createEmail(appName, appName, post.getTopic(), post.getBody())));
-            }
-            else {
                 System.out.println("Cannot create e-mail, Gmail not yet authorized");
+            }
+            else  {
+                final Draft draft = createDraft(gmailService, new MimeMessage(
+                        createEmail(appName, appName, post.getTopic(), post.getBody())));
+                return draft != null;
             }
         } catch (MessagingException | IOException e) {
             System.out.println("Error creating Gmail e-mail " + e.getMessage());
         }
+        return false;
     }
 
-    private void initGmailFromStoredCredential(String appName) throws IOException {
-        // TODO handle this during initialization
+    private Gmail initGmailFromStoredCredential(String appName) throws IOException {
         final DataStore<Serializable> dataStore = dataStoreFactory.getDataStore(StoredCredential.DEFAULT_DATA_STORE_ID);
         if (dataStore.containsKey(appName)) {
             final StoredCredential storedCredential = (StoredCredential) dataStore.get(appName);
+
             GoogleCredential credential = new GoogleCredential.Builder()
                     .setTransport(HTTP_TRANSPORT)
                     .setJsonFactory(JSON_FACTORY)
-                    .setClientSecrets(System.getenv(GMAIL_CLIENT_ID), System.getenv(GMAIL_CLIENT_SECRET)).build();
-            credential.setAccessToken(storedCredential.getAccessToken());
-            gmailService = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
+                    .setClientSecrets(env.getProperty(GMAIL_CLIENT_ID), env.getProperty(GMAIL_CLIENT_SECRET))
+                    .build()
+                    .setAccessToken(storedCredential.getAccessToken())
+                    .setRefreshToken(storedCredential.getRefreshToken());
+
+            return new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
                     .setApplicationName(APPLICATION_NAME)
                     .build();
         }
+        return null;
     }
 
-    private Draft createDraft(Gmail service, String userId, MimeMessage email)
+    private Draft createDraft(Gmail service, MimeMessage email)
             throws MessagingException, IOException {
         Message message = createMessageWithEmail(email);
         Draft draft = new Draft();
         draft.setMessage(message);
-        draft = service.users().drafts().create(userId, draft).execute();
+        draft = service.users()
+                       .drafts()
+                       .create("me", draft)
+                       .execute();
 
         System.out.println("draft id: " + draft.getId());
         System.out.println(draft.toPrettyString());

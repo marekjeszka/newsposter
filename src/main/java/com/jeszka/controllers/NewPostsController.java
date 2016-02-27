@@ -29,6 +29,7 @@ public class NewPostsController {
         final List<String> storedApps = passwordStore.getStoredApps();
         System.out.println("Posting... no of apps: " + storedApps.size());
         for (String app : storedApps) {
+            // TODO handle create returning false
             if (PasswordStore.isEmail(app)) {
                 gmailPoster.create(post, app, null);
             }
