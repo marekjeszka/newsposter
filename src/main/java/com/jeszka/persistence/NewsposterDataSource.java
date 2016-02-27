@@ -40,7 +40,7 @@ public class NewsposterDataSource {
         }
         else {
             EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
-            return builder.setType(EmbeddedDatabaseType.H2).addScript("db/sql/create-db.sql").build();
+            return builder.setType(EmbeddedDatabaseType.H2).addScript("db/sql/update/01_create_app_credentials.sql").build();
         }
     }
 

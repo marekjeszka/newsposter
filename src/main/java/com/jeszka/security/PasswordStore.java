@@ -4,6 +4,7 @@ import com.jeszka.dao.PosterDao;
 import com.jeszka.domain.AppCredentials;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.util.StringUtils;
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
@@ -127,14 +128,19 @@ public class PasswordStore {
      * @return true, if succeeded
      */
     public boolean storeCredentials(String appName, String hashedUser, String hashedPassword) {
-        AppCredentials appCredentials = new AppCredentials.Builder().appName(appName)
-                                                                    .username(hashedUser)
-                                                                    .password(hashedPassword)
-                                                                    .enabled(true)
-                                                                    .build();
-        final int result = posterDao.saveAppCredentials(appCredentials);
-        System.out.println("Storing credentials result: " + result);
-        return true;
+        try {
+            AppCredentials appCredentials = new AppCredentials.Builder().appName(appName)
+                                                                        .username(hashedUser)
+                                                                        .password(hashedPassword)
+                                                                        .enabled(true)
+                                                                        .build();
+            final int result = posterDao.saveAppCredentials(appCredentials);
+            System.out.println("Storing credentials result: " + result);
+            return true;
+        } catch (DuplicateKeyException e) {
+            System.out.println("Storing credentials not successful " + e.getMessage());
+            return false;
+        }
     }
 
     public AppCredentials getCredentials(String appName, String masterPassword) {
