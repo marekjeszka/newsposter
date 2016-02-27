@@ -73,6 +73,10 @@ app.controller('credentialsController', function($scope, $http, $window) {
              });
     }
 
+    $scope.$on('googleAuthorized', function() {
+        $scope.initApps();
+    });
+
     $scope.initApps();
 });
 
@@ -100,6 +104,9 @@ app.controller('googleController', function($scope, $http, $window, $location) {
         }
         $http.post('/credentials', credentialsObj).
             then(function successCallback(response) {
+                $scope.$emit('googleAuthorized');
+                $window.close();
+            }, function errorCallback(response) {
                 $window.close();
             });
     }
