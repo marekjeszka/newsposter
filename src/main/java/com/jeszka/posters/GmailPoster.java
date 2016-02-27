@@ -53,11 +53,10 @@ public class GmailPoster implements Poster {
     private static HttpTransport HTTP_TRANSPORT;
 
     static final String REDIRECT_URL = "https://safe-woodland-63868.herokuapp.com/googleAuthorized.html";  // TODO dynamically
-    static final String TOKEN_ADDRESS = "https://accounts.google.com/o/oauth2/token";
-    static final String AUTH_ADDRESS = "https://accounts.google.com/o/oauth2/auth";
     static final String GMAIL_CLIENT_ID = "GMAIL_CLIENT_ID";
     static final String GMAIL_CLIENT_SECRET = "GMAIL_CLIENT_SECRET";
     static final String GRANT_TYPE = "authorization_code";
+    static final String ACCESS_TYPE = "offline";
 
     static final List<String> SCOPES =
             Collections.singletonList(GmailScopes.GMAIL_COMPOSE);
@@ -99,11 +98,11 @@ public class GmailPoster implements Poster {
         final GoogleAuthorizationCodeRequestUrl authorizationCodeRequestUrl =
                 (GoogleAuthorizationCodeRequestUrl) flow.newAuthorizationUrl();
         return authorizationCodeRequestUrl
-                   .setRedirectUri(REDIRECT_URL)
-                   .setScopes(SCOPES)
-                   .setState(email)
-                   .setAccessType("offline")
-                   .build();
+                .setRedirectUri(REDIRECT_URL)
+                .setScopes(SCOPES)
+                .setState(email)
+                .setAccessType(ACCESS_TYPE) // to receive refresh token
+                .build();
     }
 
     @Override
@@ -153,6 +152,8 @@ public class GmailPoster implements Poster {
         final DataStore<Serializable> dataStore = dataStoreFactory.getDataStore(StoredCredential.DEFAULT_DATA_STORE_ID);
         if (dataStore.containsKey(appName)) {
             final StoredCredential storedCredential = (StoredCredential) dataStore.get(appName);
+
+            // offline mode - expiration date ignored
 
             GoogleCredential credential = new GoogleCredential.Builder()
                     .setTransport(HTTP_TRANSPORT)
