@@ -70,12 +70,13 @@ app.controller('credentialsController', function($scope, $http, $window) {
         $http.post('/authorize', document.getElementById("email").value)
              .then(function successCallback(response) {
                  $window.open(response.data, 'Google OAuth', 'width=640,height=540');
+                 $window.onfocus = function() {
+                    // refresh available apps when user ends Google authorization
+                    $scope.initApps();
+                    document.getElementById("email").value = '';
+                 };
              });
     }
-
-    $scope.$on('googleAuthorized', function() {
-        $scope.initApps();
-    });
 
     $scope.initApps();
 });
@@ -104,10 +105,9 @@ app.controller('googleController', function($scope, $http, $window, $location) {
         }
         $http.post('/credentials', credentialsObj).
             then(function successCallback(response) {
-                $scope.$emit('googleAuthorized');
-                $window.close();
+                $scope.result = "successful";
             }, function errorCallback(response) {
-                $window.close();
+                $scope.result = "error";
             });
     }
 
