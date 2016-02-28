@@ -1,13 +1,6 @@
 var app = angular.module('myapp', []);
 
 app.controller('posterController', function($scope, $http, $window){
-    // TODO start using Spring filters for redirection
-    $scope.init = function() {
-        $http.get('/isAuthorized')
-            .then(function successCallback(response) { },
-                  function errorCallback(response) { $window.location.href = "/masterPassword.html"; });
-    }
-
     $scope.sendPost = function() {
         var postObj = {
             topic: document.getElementById("postTopic").value,
@@ -16,8 +9,6 @@ app.controller('posterController', function($scope, $http, $window){
         $http.post('/post', postObj);
         // TODO provide some confirmation
     }
-
-    $scope.init();
 });
 
 app.controller('loginController', function($scope, $http, $window) {

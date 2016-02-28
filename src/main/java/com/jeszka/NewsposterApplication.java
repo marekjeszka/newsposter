@@ -7,6 +7,7 @@ import com.google.api.client.util.store.DataStoreFactory;
 import com.jeszka.persistence.S3DataStoreFactory;
 import com.jeszka.posters.GmailPoster;
 import com.jeszka.posters.WordPressPoster;
+import com.jeszka.security.CookieFilter;
 import com.jeszka.security.PasswordStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -14,7 +15,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import javax.servlet.Filter;
 import javax.sql.DataSource;
 
 @SpringBootApplication
@@ -26,6 +30,22 @@ public class NewsposterApplication {
 
     @Autowired
     DataSource dataSource;
+
+    @Bean
+    public Filter cookieFilter() {
+        return new CookieFilter();
+    }
+
+    @Bean
+    public WebMvcConfigurerAdapter adapter() {
+        return new WebMvcConfigurerAdapter() {
+            @Override
+            public void addViewControllers(ViewControllerRegistry registry) {
+                registry.addViewController("/").setViewName("forward:/index.html");
+                super.addViewControllers(registry);
+            }
+        };
+    }
 
     @Bean
     public NamedParameterJdbcTemplate getNamedParameterJdbcTemplate() {
