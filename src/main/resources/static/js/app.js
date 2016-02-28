@@ -53,8 +53,10 @@ app.controller('credentialsController', function($scope, $http, $window) {
         }
         $http.post('/credentials', credentialsObj).then(function successCallback(response) {
             $scope.initApps();
+            document.getElementById("appName").value = '';
+            document.getElementById("username").value = '';
+            document.getElementById("password").value = '';
         });
-        // TODO close modal after adding
     }
 
     $scope.authorizeGmail = function() {
@@ -65,8 +67,29 @@ app.controller('credentialsController', function($scope, $http, $window) {
                     // refresh available apps when user ends Google authorization
                     $scope.initApps();
                     document.getElementById("email").value = '';
+                    $window.onfocus = null;
                  };
              });
+    }
+
+    $scope.wordpressInputChanged = function() {
+        var appName = document.getElementById("appName").value;
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+        if (appName && username && password) {
+            document.getElementById("buttonAddWordpress").disabled = false;
+        } else {
+            document.getElementById("buttonAddWordpress").disabled = true;
+        }
+    }
+
+    $scope.gmailInputChanged = function() {
+        var inputEmail = document.getElementById("email").value;
+        if (/^[_A-Za-z0-9-+]+(.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(.[A-Za-z0-9]+)*(.[A-Za-z]{2,})$/.test(inputEmail)) {
+            document.getElementById("buttonAddGmail").disabled = false;
+        } else {
+            document.getElementById("buttonAddGmail").disabled = true;
+        }
     }
 
     $scope.initApps();
