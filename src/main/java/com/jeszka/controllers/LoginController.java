@@ -41,7 +41,6 @@ public class LoginController {
             @RequestBody Map<String, char[]> body,
             @CookieValue(value = NewsposterApplication.USER_TOKEN, required = false) String token,
             HttpServletResponse response) {
-        // TODO handle creating new password
         // check if is already authorized
         if (token != null && isAuthorized(token)) {
             return new ResponseEntity<>(HttpStatus.OK);
@@ -102,6 +101,12 @@ public class LoginController {
         if (token != null && isAuthorized(token)) {
             return new ResponseEntity<>(gmailPoster.authorize(email),HttpStatus.OK);
         }
+        // TODO return error code
         return null;
+    }
+
+    @RequestMapping(value = "/passwordRegistered", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity isRegistered() {
+        return passwordStore.isRegistered() ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
 }

@@ -2,6 +2,7 @@ package com.jeszka.security;
 
 import com.jeszka.NewsposterApplication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 
 import javax.servlet.*;
 import javax.servlet.http.Cookie;
@@ -17,6 +18,7 @@ public class CookieFilter implements Filter {
     static final String ROOT_PAGE = "/";
     static final String LOGIN_PAGE = "/masterPassword.html";
     static final String API_AUTHORIZATION = "/isAuthorized";
+    static final String API_PASSWORD_REGISTERED = "/passwordRegistered";
     static final String API_LOGIN = "/login";
 
     @Autowired
@@ -42,6 +44,9 @@ public class CookieFilter implements Filter {
                 // not authorized access to HTML page - redirect to login page
                 HttpServletResponse httpResponse = (HttpServletResponse) response;
                 httpResponse.sendRedirect(LOGIN_PAGE);
+            } else {
+                HttpServletResponse httpResponse = (HttpServletResponse) response;
+                httpResponse.sendError(HttpStatus.UNAUTHORIZED.value());
             }
         }
     }
@@ -62,6 +67,7 @@ public class CookieFilter implements Filter {
         return ROOT_PAGE.equals(requestURI) ||
                 API_LOGIN.equals(requestURI) ||
                 API_AUTHORIZATION.equals(requestURI) ||
+                API_PASSWORD_REGISTERED.equals(requestURI) ||
                 LOGIN_PAGE.equals(requestURI) ||
                 "/favicon.ico".equals(requestURI) ||
                 requestURI.startsWith("/css") ||

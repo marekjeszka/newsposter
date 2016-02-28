@@ -84,6 +84,10 @@ public class PasswordStore {
         return false;
     }
 
+    public boolean isRegistered() {
+        return posterDao.findDefaultLine() != null;
+    }
+
     /**
      * Logs in with provided password generating token,
      * that has to be used (as cookie value) in all future requests.

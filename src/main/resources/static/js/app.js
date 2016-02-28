@@ -13,15 +13,28 @@ app.controller('posterController', function($scope, $http, $window){
 
 app.controller('loginController', function($scope, $http, $window) {
     $scope.init = function() {
+        $http.get('/passwordRegistered')
+            .then(function successCallback(response) {
+                $scope.registered = true; },
+                  function errorCallback(response) {
+                $scope.registered = false; });
+
         $http.get('/isAuthorized')
             .then(function successCallback(response) { $window.location.href = "/index.html"; },
                   function errorCallback(response) { } );
     }
 
     $scope.login = function() {
-        var postObj = {
-            password: document.getElementById("password").value,
+        if ($scope.registered) {
+            var postObj = {
+                password: document.getElementById("password").value,
+            }
+        } else {
+            var postObj = {
+                password: document.getElementById("newPassword1").value,
+            }
         }
+
         $http.post('/login', postObj)
             .then(function successCallback(response) { $window.location.href = "/index.html"; },
                   function errorCallback(response) { });
@@ -30,6 +43,15 @@ app.controller('loginController', function($scope, $http, $window) {
     $scope.passwordChanged = function() {
         var passwordLength = document.getElementById("password").value.length;
         if (passwordLength < 8)
+            document.getElementById("buttonLogIn").disabled = true;
+        else
+            document.getElementById("buttonLogIn").disabled = false;
+    }
+
+    $scope.newPasswordChanged = function() {
+        var password1 = document.getElementById("newPassword1").value;
+        var password2 = document.getElementById("newPassword2").value;
+        if (password1 != password2 || password1.length < 8 || password2.length < 8)
             document.getElementById("buttonLogIn").disabled = true;
         else
             document.getElementById("buttonLogIn").disabled = false;
