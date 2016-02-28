@@ -14,10 +14,10 @@ import java.util.Optional;
 
 public class CookieFilter implements Filter {
     // TODO don't use constants here
-    private static final String ROOT_PAGE = "/";
-    private static final String LOGIN_PAGE = "/masterPassword.html";
-    private static final String API_AUTHORIZATION = "/isAuthorized";
-    private static final String API_LOGIN = "/login";
+    static final String ROOT_PAGE = "/";
+    static final String LOGIN_PAGE = "/masterPassword.html";
+    static final String API_AUTHORIZATION = "/isAuthorized";
+    static final String API_LOGIN = "/login";
 
     @Autowired
     PasswordStore passwordStore;
