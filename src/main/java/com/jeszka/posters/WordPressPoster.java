@@ -40,17 +40,19 @@ public class WordPressPoster implements Poster {
                 "  </params>\n" +
                 "</methodCall>";
 
-    private final WebTarget target;
+    private final Client client;
 
     public WordPressPoster() {
         ClientConfig config = new ClientConfig();
-        Client client = ClientBuilder.newClient(config);
-
-        target = client.target(getBaseURI());
+        client = ClientBuilder.newClient(config);
     }
 
-    private static URI getBaseURI() {
-        return UriBuilder.fromUri("http://localhost:8080/wordpress/xmlrpc.php").build();
+    WebTarget getWebTarget(String appName) {
+        return client.target(getBaseURI(appName));
+    }
+
+    private static URI getBaseURI(String appName) {
+        return UriBuilder.fromUri("http://" + appName + "/xmlrpc.php").build();
     }
 
     /**
@@ -61,7 +63,8 @@ public class WordPressPoster implements Poster {
     public boolean create(Post post, String appName, String masterPassword) {
         String postAsString = newWordpressPost(post.getTopic(), post.getBody(), appName, masterPassword);
 
-        Response response = target
+        // TODO NPE possible
+        Response response = getWebTarget(appName)
                 .request()
                 .post(Entity.entity(postAsString, MediaType.TEXT_XML));
 
@@ -71,6 +74,7 @@ public class WordPressPoster implements Poster {
 
     @Override
     public String authorize(String email) {
+        // TODO think about checking here if provided password is correct
         // no need to authorize
         return "";
     }
@@ -83,6 +87,7 @@ public class WordPressPoster implements Poster {
 
     private String newWordpressPost(String topic, String body, String appName, String masterPassword) {
         final AppCredentials myApp = passwordStore.getCredentials(appName, masterPassword);
+        // TODO NPE possible
         return String.format(NEW_WORDPRESS_POST_FORMAT,
                 myApp.getUsername(), myApp.getPassword(),
                 topic, body);
