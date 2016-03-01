@@ -41,12 +41,12 @@
                             </tr>
                         </tbody>
                     </table>
-                    <input class="form-control" id="appName" placeholder="application name" ng-model="appName" ng-change="wordpressInputChanged()"/>
+                    <input class="form-control" id="appName" placeholder="web address, e.g. mypage.com or www.myblog.com" ng-model="appName" ng-change="wordpressInputChanged()"/>
                     <input class="form-control" id="username" placeholder="username" ng-model="username" ng-change="wordpressInputChanged()"/>
                     <input class="form-control" id="password" type="password" placeholder="password" ng-model="password" ng-change="wordpressInputChanged()"/>
                     <button id="buttonAddWordpress" class="btn btn-lg btn-primary btn-block" ng-click="storeCredentials()" disabled="true">Add Wordpress</button>
                     <br>
-                    <input class="form-control" id="email" placeholder="e-mail address" ng-model="email" ng-change="gmailInputChanged()"/>
+                    <input class="form-control" id="email" placeholder="e-mail address, e.g. mail@gmail.com" ng-model="email" ng-change="gmailInputChanged()"/>
                     <button id="buttonAddGmail" class="btn btn-lg btn-primary btn-block" ng-click="authorizeGmail()" disabled="true">Add Gmail</button>
                 </div>
                 <div class="modal-footer">
