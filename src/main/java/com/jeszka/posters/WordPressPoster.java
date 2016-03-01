@@ -14,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
+import java.util.Optional;
 
 public class WordPressPoster implements Poster {
     @Autowired
@@ -61,15 +62,18 @@ public class WordPressPoster implements Poster {
      * @param masterPassword password to encode stored credentials
      */
     public boolean create(Post post, String appName, String masterPassword) {
-        String postAsString = newWordpressPost(post.getTopic(), post.getBody(), appName, masterPassword);
+        Optional<String> postAsString = newWordpressPost(post.getTopic(), post.getBody(), appName, masterPassword);
 
-        // TODO NPE possible
-        Response response = getWebTarget(appName)
-                .request()
-                .post(Entity.entity(postAsString, MediaType.TEXT_XML));
+        if (postAsString.isPresent()) {
+            Response response = getWebTarget(appName)
+                    .request()
+                    .post(Entity.entity(postAsString, MediaType.TEXT_XML));
 
-        System.out.println("Wordpress post creation: " + response);
-        return response.getStatus() == Response.Status.OK.getStatusCode();
+            System.out.println("Wordpress post creation: " + response);
+            return response.getStatus() == Response.Status.OK.getStatusCode();
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -85,11 +89,13 @@ public class WordPressPoster implements Poster {
         return true;
     }
 
-    private String newWordpressPost(String topic, String body, String appName, String masterPassword) {
-        final AppCredentials myApp = passwordStore.getCredentials(appName, masterPassword);
-        // TODO NPE possible
-        return String.format(NEW_WORDPRESS_POST_FORMAT,
-                myApp.getUsername(), myApp.getPassword(),
-                topic, body);
+    private Optional<String> newWordpressPost(String topic, String body, String appName, String masterPassword) {
+        final Optional<AppCredentials> myApp = Optional.ofNullable(passwordStore.getCredentials(appName, masterPassword));
+        return myApp.isPresent() ?
+                   Optional.of(
+                       String.format(NEW_WORDPRESS_POST_FORMAT,
+                           myApp.get().getUsername(), myApp.get().getPassword(),
+                           topic, body)) :
+                   Optional.empty();
     }
 }
