@@ -67,7 +67,7 @@ public class WordPressPoster implements Poster {
         if (postAsString.isPresent()) {
             Response response = getWebTarget(appName)
                     .request()
-                    .post(Entity.entity(postAsString, MediaType.TEXT_XML));
+                    .post(Entity.entity(postAsString.get(), MediaType.TEXT_XML));
 
             System.out.println("Wordpress post creation: " + response);
             return response.getStatus() == Response.Status.OK.getStatusCode();
