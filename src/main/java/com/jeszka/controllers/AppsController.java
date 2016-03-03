@@ -26,9 +26,18 @@ public class AppsController {
 
     @RequestMapping(method = RequestMethod.GET)
     public @ResponseBody
-    List<String> storedApps()
+    List<AppCredentials> storedApps()
     {
-        return passwordStore.getStoredApps();
+        return passwordStore.getAllApps();
+    }
+
+    @RequestMapping(method = RequestMethod.PATCH)
+    public @ResponseBody
+    ResponseEntity<Void> enableApp(@RequestBody AppCredentials appCredentials)
+    {
+        return passwordStore.enableApp(appCredentials.getAppName(), appCredentials.getEnabled()) ?
+                ResponseEntity.ok().build() :
+                ResponseEntity.notFound().build();
     }
 
     @RequestMapping(method = RequestMethod.DELETE, consumes = MediaType.TEXT_PLAIN_VALUE)
@@ -40,7 +49,7 @@ public class AppsController {
     }
 
 
-    @RequestMapping(value = "/credentials", method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity storeCredentials(@RequestBody AppCredentials appCredentials,
                                            @CookieValue(NewsposterApplication.USER_TOKEN) String token) {
         try {

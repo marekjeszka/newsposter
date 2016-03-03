@@ -6,6 +6,7 @@ import com.jeszka.security.PasswordStore;
 import org.glassfish.jersey.client.ClientConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -65,12 +66,16 @@ public class WordPressPoster implements Poster {
         Optional<String> postAsString = newWordpressPost(post.getTopic(), post.getBody(), appName, masterPassword);
 
         if (postAsString.isPresent()) {
-            Response response = getWebTarget(appName)
-                    .request()
-                    .post(Entity.entity(postAsString.get(), MediaType.TEXT_XML));
-
-            System.out.println("Wordpress post creation: " + response);
-            return response.getStatus() == Response.Status.OK.getStatusCode();
+            try {
+                Response response = getWebTarget(appName)
+                        .request()
+                        .post(Entity.entity(postAsString.get(), MediaType.TEXT_XML));
+                System.out.println("Wordpress post creation: " + response);
+                return response.getStatus() == Response.Status.OK.getStatusCode();
+            } catch (ProcessingException e) {
+                System.out.println("Error posting to WordPress " + e.getMessage());
+                return false;
+            }
         } else {
             return false;
         }

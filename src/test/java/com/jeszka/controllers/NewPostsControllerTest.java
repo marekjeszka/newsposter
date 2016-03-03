@@ -37,7 +37,7 @@ public class NewPostsControllerTest {
         String app2 = "bbb";
         String token = "ttt";
         Post post = new Post();
-        when(passwordStore.getStoredApps()).thenReturn(Arrays.asList(app1, app2));
+        when(passwordStore.getActiveApps()).thenReturn(Arrays.asList(app1, app2));
 
         newPostsController.newPost(post, token);
 

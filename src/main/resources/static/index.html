@@ -32,21 +32,24 @@
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                <th>Active</th>
                                 <th>Application name</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr ng-repeat="app in apps">
+                                <td><input type="checkbox" ng-model="app.enabled" ng-change="enableApp()"/></td>
+                                <td>{{app.appName}}</td>
                                 <td>
-                                    <a class="btn btn-danger btn-xs" ng-click="deleteApp(app)" >
+                                    <a class="btn btn-danger btn-xs" ng-click="deleteApp(app.appName)" >
                                         <i class="glyphicon glyphicon-remove"></i>
                                     </a>
                                 </td>
-                                <td>{{app}}</td>
                             </tr>
                         </tbody>
                     </table>
+                    <br>
                     <input class="form-control" id="appName" placeholder="web address, e.g. mypage.com or www.myblog.com" ng-model="appName" ng-change="wordpressInputChanged()"/>
                     <input class="form-control" id="username" placeholder="username" ng-model="username" ng-change="wordpressInputChanged()"/>
                     <input class="form-control" id="password" type="password" placeholder="password" ng-model="password" ng-change="wordpressInputChanged()"/>

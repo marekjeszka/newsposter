@@ -81,13 +81,21 @@ app.controller('credentialsController', function($scope, $http, $window) {
         });
     }
 
+    $scope.enableApp = function() {
+        var patchObj = {
+            appName: this.app.appName,
+            enabled: this.app.enabled
+        };
+        $http.patch('/apps', patchObj);
+    }
+
     $scope.storeCredentials = function() {
         var credentialsObj = {
             appName: document.getElementById("appName").value,
             username: document.getElementById("username").value,
             password: document.getElementById("password").value
         }
-        $http.post('/apps/credentials', credentialsObj).then(function successCallback(response) {
+        $http.post('/apps', credentialsObj).then(function successCallback(response) {
             $scope.initApps();
             document.getElementById("appName").value = '';
             document.getElementById("username").value = '';

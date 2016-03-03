@@ -93,6 +93,6 @@ public class PasswordStoreTest {
 //    public void getStoredAppsTest() {
 //        final PasswordStore passwordStore = getPasswordStoreSpied();
 //
-//        assertEquals(1, passwordStore.getStoredApps().size());
+//        assertEquals(1, passwordStore.getActiveApps().size());
 //    }
 }

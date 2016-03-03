@@ -40,6 +40,11 @@ public class PosterDao {
         return defaultLine;
     }
 
+    public List<AppCredentials> findAllApps() {
+        String sql = "SELECT * FROM app_credentials WHERE appName != '" + PasswordStore.DEFAULT_LINE + "'";
+        return namedParameterJdbcTemplate.query(sql, PosterDao::rowMapper);
+    }
+
     public List<String> findAllActiveAppNames() {
         String sql = "SELECT appName FROM app_credentials WHERE enabled = 't'";
         return namedParameterJdbcTemplate.query(sql, (rs, rowNum) -> rs.getString(AppCredentials.APP_NAME));
@@ -65,6 +70,14 @@ public class PosterDao {
         String sql = "DELETE FROM app_credentials WHERE appName = :appName";
         Map<String, Object> params = new HashMap<>();
         params.put(AppCredentials.APP_NAME, appName);
+        return namedParameterJdbcTemplate.update(sql, params) == 1;
+    }
+
+    public boolean enableApp(String appName, boolean b) {
+        String sql = "UPDATE app_credentials SET enabled = :enabled WHERE appName = :appName";
+        Map<String, Object> params = new HashMap<>();
+        params.put(AppCredentials.APP_NAME, appName);
+        params.put(AppCredentials.ENABLED, b);
         return namedParameterJdbcTemplate.update(sql, params) == 1;
     }
 

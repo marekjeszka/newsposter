@@ -18,7 +18,7 @@ public class PosterDaoTest {
     private EmbeddedDatabase embeddedDatabase;
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         embeddedDatabase.shutdown();
     }
 
@@ -118,5 +118,27 @@ public class PosterDaoTest {
         assertTrue(result);
         assertNull(posterDao.findByAppName(appName));
         assertEquals(1, posterDao.findAllActiveAppNames().size());
+    }
+
+    @Test
+    public void testEnable() {
+        String appName = "wordpress_1";
+        embeddedDatabase = getEmbeddedDatabase();
+        PosterDao posterDao = preparePosterDao();
+
+        assertFalse(posterDao.enableApp("noName", true));
+        assertTrue(posterDao.enableApp(appName, false));
+        assertEquals(1, posterDao.findAllActiveAppNames().size());
+
+        assertTrue(posterDao.enableApp(appName, true));
+        assertEquals(2, posterDao.findAllActiveAppNames().size());
+    }
+
+    @Test
+    public void testGetAllApps() {
+        embeddedDatabase = getEmbeddedDatabase();
+        PosterDao posterDao = preparePosterDao();
+
+        assertEquals(3, posterDao.findAllApps().size());
     }
 }
