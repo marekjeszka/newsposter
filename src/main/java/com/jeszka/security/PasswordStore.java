@@ -165,11 +165,19 @@ public class PasswordStore {
         return null;
     }
 
+    public static boolean isEmail(final String email) {
+        return !StringUtils.isEmpty(email) && email.matches(EMAIL_PATTERN);
+    }
+
     public List<String> getStoredApps() {
         return posterDao.findAllActiveAppNames();
     }
 
-    public static boolean isEmail(final String email) {
-        return !StringUtils.isEmpty(email) && email.matches(EMAIL_PATTERN);
+    public boolean deleteApp(String appName) {
+        if (PasswordStore.DEFAULT_LINE.equals(appName)) {
+            return false;
+        }
+
+        return posterDao.deleteApp(appName);
     }
 }

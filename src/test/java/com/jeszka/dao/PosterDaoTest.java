@@ -8,7 +8,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
-import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.List;
 
@@ -30,13 +29,21 @@ public class PosterDaoTest {
         return posterDao;
     }
 
-    @Test
-    public void testFindAllActiveAppNames() {
-        embeddedDatabase = new EmbeddedDatabaseBuilder()
+    private EmbeddedDatabase getEmbeddedDatabase() {
+        return getEmbeddedDatabase(new String[] {"db/sql/create-db.sql", "db/sql/insert-data.sql"});
+    }
+
+    private EmbeddedDatabase getEmbeddedDatabase(String[] scripts) {
+        return new EmbeddedDatabaseBuilder()
                 .setType(EmbeddedDatabaseType.H2)
                 .generateUniqueName(true)
-                .addScripts("db/sql/create-db.sql", "db/sql/insert-data.sql")
+                .addScripts(scripts)
                 .build();
+    }
+
+    @Test
+    public void testFindAllActiveAppNames() {
+        embeddedDatabase = getEmbeddedDatabase();
         PosterDao posterDao = preparePosterDao();
 
         final List<String> allActiveAppNames = posterDao.findAllActiveAppNames();
@@ -46,11 +53,8 @@ public class PosterDaoTest {
 
     @Test
     public void testFindDefault_fail() {
-        embeddedDatabase = new EmbeddedDatabaseBuilder()
-                .setType(EmbeddedDatabaseType.H2)
-                .generateUniqueName(true)
-                .addScripts("db/sql/create-db.sql", "db/sql/insert-data-no_default.sql")
-                .build();
+        embeddedDatabase =
+                getEmbeddedDatabase(new String[]{"db/sql/create-db.sql", "db/sql/insert-data-no_default.sql"});
         PosterDao posterDao = preparePosterDao();
 
         assertNull(posterDao.findDefaultLine());
@@ -59,11 +63,7 @@ public class PosterDaoTest {
 
     @Test
     public void testFindDefault() {
-        embeddedDatabase = new EmbeddedDatabaseBuilder()
-                .setType(EmbeddedDatabaseType.H2)
-                .generateUniqueName(true)
-                .addScripts("db/sql/create-db.sql", "db/sql/insert-data.sql")
-                .build();
+        embeddedDatabase = getEmbeddedDatabase();
         PosterDao posterDao = preparePosterDao();
 
         final AppCredentials defaultLine = posterDao.findDefaultLine();
@@ -75,11 +75,7 @@ public class PosterDaoTest {
     @Test
     public void testFindByAppName() {
         final String appName = "wordpress_1";
-        embeddedDatabase = new EmbeddedDatabaseBuilder()
-                .setType(EmbeddedDatabaseType.H2)
-                .generateUniqueName(true)
-                .addScripts("db/sql/create-db.sql", "db/sql/insert-data.sql")
-                .build();
+        embeddedDatabase = getEmbeddedDatabase();
         PosterDao posterDao = preparePosterDao();
 
         final AppCredentials wordpress_1 = posterDao.findByAppName(appName);
@@ -101,15 +97,26 @@ public class PosterDaoTest {
                                             .password("p")
                                             .enabled(true)
                                             .build();
-        embeddedDatabase = new EmbeddedDatabaseBuilder()
-                .setType(EmbeddedDatabaseType.H2)
-                .generateUniqueName(true)
-                .addScripts("db/sql/create-db.sql", "db/sql/insert-data.sql")
-                .build();
+        embeddedDatabase = getEmbeddedDatabase();
         PosterDao posterDao = preparePosterDao();
 
         posterDao.saveAppCredentials(appCredentials);
 
         assertEquals(appName, posterDao.findByAppName(appName).getAppName());
+    }
+
+
+    @Test
+    public void testDeleteApp() {
+        String appName = "wordpress_1";
+        embeddedDatabase = getEmbeddedDatabase();
+        PosterDao posterDao = preparePosterDao();
+
+        boolean result = posterDao.deleteApp(appName);
+
+        assertFalse(posterDao.deleteApp("noName"));
+        assertTrue(result);
+        assertNull(posterDao.findByAppName(appName));
+        assertEquals(1, posterDao.findAllActiveAppNames().size());
     }
 }

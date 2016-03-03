@@ -56,6 +56,13 @@ public class PosterDao {
         return namedParameterJdbcTemplate.update(sql, params);
     }
 
+    public boolean deleteApp(String appName) {
+        String sql = "DELETE FROM app_credentials WHERE appName = :appName";
+        Map<String, Object> params = new HashMap<>();
+        params.put(AppCredentials.APP_NAME, appName);
+        return namedParameterJdbcTemplate.update(sql, params) == 1;
+    }
+
     private static AppCredentials rowMapper(ResultSet rs, int rowNum) throws SQLException {
         return new AppCredentials.Builder().id(rs.getInt("id"))
                                    .appName(rs.getString(AppCredentials.APP_NAME))
@@ -66,7 +73,7 @@ public class PosterDao {
                                    .build();
     }
 
-    private static boolean getBoolean(String string) throws SQLException {
+    private static boolean getBoolean(String string) {
         switch (string) {
             case "t":
             case "TRUE":

@@ -38,10 +38,4 @@ public class NewPostsController {
             }
         }
     }
-
-    @RequestMapping(value = "/apps")
-    public @ResponseBody List<String> storedApps()
-    {
-        return passwordStore.getStoredApps();
-    }
 }

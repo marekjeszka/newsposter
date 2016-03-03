@@ -32,11 +32,17 @@
                     <table class="table table-striped">
                         <thead>
                             <tr>
+                                <th>#</th>
                                 <th>Application name</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr ng-repeat="app in apps">
+                                <td>
+                                    <a class="btn btn-danger btn-xs" ng-click="deleteApp(app)" >
+                                        <i class="glyphicon glyphicon-remove"></i>
+                                    </a>
+                                </td>
                                 <td>{{app}}</td>
                             </tr>
                         </tbody>

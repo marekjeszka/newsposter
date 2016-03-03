@@ -67,6 +67,20 @@ app.controller('credentialsController', function($scope, $http, $window) {
         });
     }
 
+    $scope.deleteApp = function(appName) {
+        var deleteRequest = {
+            method: 'DELETE',
+            url: 'apps',
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            data: appName
+        };
+        $http(deleteRequest).then(function successCallback(response) {
+              $scope.initApps();
+        });
+    }
+
     $scope.storeCredentials = function() {
         var credentialsObj = {
             appName: document.getElementById("appName").value,
