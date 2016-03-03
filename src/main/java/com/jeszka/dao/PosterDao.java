@@ -3,6 +3,7 @@ package com.jeszka.dao;
 import com.jeszka.domain.AppCredentials;
 import com.jeszka.security.PasswordStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -53,7 +54,11 @@ public class PosterDao {
         params.put(AppCredentials.USERNAME, appCredentials.getUsername());
         params.put(AppCredentials.PASSWORD, appCredentials.getPassword());
         params.put(AppCredentials.ENABLED, appCredentials.getEnabled());
-        return namedParameterJdbcTemplate.update(sql, params);
+        try {
+            return namedParameterJdbcTemplate.update(sql, params);
+        } catch (DuplicateKeyException e) {
+            return 0;
+        }
     }
 
     public boolean deleteApp(String appName) {

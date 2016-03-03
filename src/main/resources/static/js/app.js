@@ -87,7 +87,7 @@ app.controller('credentialsController', function($scope, $http, $window) {
             username: document.getElementById("username").value,
             password: document.getElementById("password").value
         }
-        $http.post('/credentials', credentialsObj).then(function successCallback(response) {
+        $http.post('/apps/credentials', credentialsObj).then(function successCallback(response) {
             $scope.initApps();
             document.getElementById("appName").value = '';
             document.getElementById("username").value = '';
@@ -96,7 +96,7 @@ app.controller('credentialsController', function($scope, $http, $window) {
     }
 
     $scope.authorizeGmail = function() {
-        $http.post('/authorize', document.getElementById("email").value)
+        $http.post('/apps/authorize', document.getElementById("email").value)
              .then(function successCallback(response) {
                  $window.open(response.data, 'Google OAuth', 'width=640,height=540');
                  $window.onfocus = function() {
@@ -154,7 +154,7 @@ app.controller('googleController', function($scope, $http, $window, $location) {
             username: null,
             password: getParam('code')
         }
-        $http.post('/credentials', credentialsObj).
+        $http.post('/apps/credentials', credentialsObj).
             then(function successCallback(response) {
                 $scope.result = "successful";
             }, function errorCallback(response) {
