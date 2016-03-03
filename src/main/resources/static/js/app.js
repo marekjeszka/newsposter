@@ -99,7 +99,7 @@ app.controller('credentialsController', function($scope, $http, $window) {
         var username = document.getElementById("username").value;
         var password = document.getElementById("password").value;
         if (appName && username && password &&
-            /^([\da-z-]*)(\.[\da-z-]{2,})*(\.[a-z]{2,6})?(:[\d]{1,5})?(\/[\w\.-]+)*$/.test(appName)) {
+            /^([\da-z-]*)(\.[\da-z-]{2,})*(\.[a-z]{2,6})?(:[\d]{1,5})?(\/[\w\-]+)*$/.test(appName)) {
             document.getElementById("buttonAddWordpress").disabled = false;
         } else {
             document.getElementById("buttonAddWordpress").disabled = true;
