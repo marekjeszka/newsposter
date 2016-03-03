@@ -28,7 +28,7 @@ public class LoginController {
     GmailPoster gmailPoster;
 
     public boolean isAuthorized(String token) {
-        return passwordStore.isAuthorized(token);
+        return token != null && passwordStore.isAuthorized(token);
     }
 
     @RequestMapping("/isAuthorized")
@@ -42,7 +42,7 @@ public class LoginController {
             @CookieValue(value = NewsposterApplication.USER_TOKEN, required = false) String token,
             HttpServletResponse response) {
         // check if is already authorized
-        if (token != null && isAuthorized(token)) {
+        if (isAuthorized(token)) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
 
@@ -71,7 +71,7 @@ public class LoginController {
     public ResponseEntity storeCredentials(@RequestBody AppCredentials appCredentials,
                                  @CookieValue(NewsposterApplication.USER_TOKEN) String token) {
         // TODO check duplicates
-        if (token != null && isAuthorized(token)) {
+        if (isAuthorized(token)) {
             try {
                 boolean result;
                 if (PasswordStore.isEmail(appCredentials.getAppName())) {
@@ -98,11 +98,11 @@ public class LoginController {
     public ResponseEntity<String> authorize(
                   @RequestBody String email,
                   @CookieValue(NewsposterApplication.USER_TOKEN) String token) {
-        if (token != null && isAuthorized(token)) {
+        // TODO add input param with application type to authorize
+        if (isAuthorized(token)) {
             return new ResponseEntity<>(gmailPoster.authorize(email),HttpStatus.OK);
         }
-        // TODO return error code
-        return null;
+        return ResponseEntity.badRequest().body("User token cookie is missing");
     }
 
     @RequestMapping(value = "/passwordRegistered", method = RequestMethod.GET)
