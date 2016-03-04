@@ -54,8 +54,7 @@ public class LoginController {
     private Cookie newCookie() {
         final Cookie cookie =
                 new Cookie(NewsposterApplication.USER_TOKEN, UUID.randomUUID().toString());
-        final int SEC_IN_5_YEARS = 60 * 60 * 24 * 365 * 5;
-        cookie.setMaxAge(SEC_IN_5_YEARS);
+        cookie.setMaxAge(-1);
         return cookie;
     }
 
