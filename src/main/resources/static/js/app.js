@@ -6,8 +6,16 @@ app.controller('posterController', function($scope, $http, $window){
             topic: document.getElementById("postTopic").value,
             body: document.getElementById("postBody").value
         }
-        $http.post('/post', postObj);
-        // TODO provide some confirmation
+        waitingDialog.show('Posting...', {dialogSize: 'sm'});
+        $http.post('/post', postObj)
+            .then(function successCallback(response) {
+                    waitingDialog.hide();
+                    $('#postedModal').modal();
+                  },
+                  function errorCallback(response) {
+                    waitingDialog.hide();
+                  });
+
     }
 
     $scope.postEntered = function() {
