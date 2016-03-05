@@ -12,3 +12,6 @@
   * set environment variables for Amazon S3
   * add Postgresql add-on
   * create table
+
+### Facebook compatibility
+  * with use of Chrome extension
