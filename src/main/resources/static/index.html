@@ -15,9 +15,9 @@
         </div>
         <div class="row">
             <div class="col-md-6 col-md-offset-3">
-                <input id="postTopic" type="text" class="form-control" placeholder="Topic"/>
-                <textarea id="postBody" class="form-control" rows="8" placeholder="Content"></textarea>
-                <button id="postButton" class="btn btn-lg btn-primary" ng-click="sendPost()">Send post</button>
+                <input id="postTopic" type="text" class="form-control" placeholder="Topic" ng-model="postTopic" ng-change="postEntered()"/>
+                <textarea id="postBody" class="form-control" rows="8" placeholder="Content" ng-model="postBody" ng-change="postEntered()"></textarea>
+                <button id="postButton" class="btn btn-lg btn-primary" disabled="true" ng-click="sendPost()">Send post</button>
             </div>
         </div>
     </div>

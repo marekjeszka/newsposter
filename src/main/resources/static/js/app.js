@@ -9,6 +9,16 @@ app.controller('posterController', function($scope, $http, $window){
         $http.post('/post', postObj);
         // TODO provide some confirmation
     }
+
+    $scope.postEntered = function() {
+        var topic = document.getElementById("postTopic").value;
+        var body = document.getElementById("postBody").value;
+        if (topic.length < 3 || body.length < 10) {
+            document.getElementById("postButton").disabled = true;
+        } else {
+            document.getElementById("postButton").disabled = false;
+        }
+    }
 });
 
 app.controller('loginController', function($scope, $http, $window) {
