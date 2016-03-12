@@ -10,6 +10,7 @@ app.controller('posterController', function($scope, $http, $window){
         $http.post('/post', postObj)
             .then(function successCallback(response) {
                     waitingDialog.hide();
+                    $scope.targetsCount = response.data;
                     $('#postedModal').modal();
                   },
                   function errorCallback(response) {

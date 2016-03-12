@@ -20,20 +20,20 @@
                 <button id="postButton" class="btn btn-lg btn-primary" disabled="true" ng-click="sendPost()">Send post</button>
             </div>
         </div>
-    </div>
-
-    <div id="postedModal" class="modal fade" role="dialog" ng-controller="posterController">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <h5>Posted to targets.</h5>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <div id="postedModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <h5>Posted to targets. Targets count: {{targetsCount}}</h5>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
 
     <div id="settingsModal" class="modal fade" role="dialog" ng-controller="credentialsController">
         <div class="modal-dialog">
